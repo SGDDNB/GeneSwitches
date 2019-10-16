@@ -20,7 +20,7 @@ You can install the source code from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("YiqunCao/GeneSwitches")
+devtools::install_github("SGDDNB/GeneSwitches")
 ```
 
 ## Input datasets
