@@ -1,0 +1,23 @@
+Package: GeneSwitches
+Type: Package
+Title: Discover the order of gene regulatory events during cell state transitions
+Version: 0.1.0
+Author: Elaine Yiqun CAO
+Maintainer: Elaine Yiqun CAO <yiqun.cao@u.nus.edu.sg>
+Description: This package discovers the order of gene regulatory events during
+    cell state transitions at single-cell resolution. It works on any single-cell
+    trajectory or pseudo-time ordering of cells to discover the genes that act as 
+    on/off switches between cell states and importantly the ordering at which these
+    switches take place.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.2)
+Imports:
+    SingleCellExperiment (>= 1.6.0), 
+    ggplot2 (>= 3.1.0),
+    RColorBrewer,
+    plyr
+RoxygenNote: 6.1.1.9000
+Suggests: 
+    testthat
