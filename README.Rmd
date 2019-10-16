@@ -26,23 +26,44 @@ importantly the ordering at which these switches take place.
 
 ## Installation
 
-You can install the source code from [GitHub](https://github.com/) with:
+##### Check and install required packages
+
+Users may use following codes to check and install all the required packages.
 
 ``` r
-# install.packages("devtools")
+list.of.packages <- c("SingleCellExperiment", "Biobase", "fastglm", "ggplot2",
+                      "plyr", "RColorBrewer", "ggrepel", "ggridges", "gridExtra", "devtools")
+
+## for package "fastglm", "ggplot2", "plyr", "RColorBrewer", "ggrepel", "ggridges", "gridExtra"
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+## for package "SingleCellExperiment", "Biobase"
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) BiocManager::install(new.packages)
+```
+
+##### Install GeneSwitches
+
+The source code of GeneSwitches can be installed from [GitHub](https://github.com/) with:
+
+``` r
 devtools::install_github("SGDDNB/GeneSwitches")
 ```
 
+
 ## Input datasets
 
-  GeneSwitches requires two inputs, namely a gene expression matrix and corresponding pseudo-time ordering of each cell. We convert these input datasets in a SingleCellExperiment object (Lun and Risso 2017) and below you will find a full “start-to-finish” workflow to realise the potential of this analyis. Any additions, suggestions or comments are welcome in the github repository.
+GeneSwitches requires two inputs, namely a gene expression matrix and corresponding pseudo-time ordering of each cell. We convert these input datasets in a `SingleCellExperiment` object (Lun and Risso 2017) and below you will find a full “start-to-finish” workflow to realise the potential of this analyis. Any additions, suggestions or comments are welcome in the github repository.
 
 ```{r load library, message=FALSE}
+## load libraries
 library(GeneSwitches)
 library(SingleCellExperiment)
 ```
 
-  For this vignette, we will work with a published dataset of single-cell RNA-seq data from the differentiation of human embryonic stem cells (hESC) to cardiomyocytes (CM) (Friedman et al., 2018). For the purpose of demonstration, we have subset the original dataset into 3000 cells and run Monocle2 to generate trajectories. Both the Log-normalized gene expression and Monocle2 inferred trajectory results can be downloaded from here as [logexpdata.RData](http://files.ddnetbio.com/logexpdata.RData), and [cardiac_monocle2.RData](http://files.ddnetbio.com/cardiac_monocle2.RData). This dataset was chosen in part because it shows a bifurcating cell fate of cardiac hESC differentiation that gives rise to definitive cardiomyocytes (Path1) or non-contractile cardiac derivatives (Path2) that allow for all aspect of GeneSwitches to be applied. 
+For this vignette, we will work with a published dataset of single-cell RNA-seq data from the differentiation of human embryonic stem cells (hESC) to cardiomyocytes (CM) (Friedman et al., 2018). For the purpose of demonstration, we have subset the original dataset into 3000 cells and run Monocle2 to generate trajectories. Both the Log-normalized gene expression and Monocle2 inferred trajectory results can be downloaded from here as [logexpdata.RData](http://files.ddnetbio.com/logexpdata.RData), and [cardiac_monocle2.RData](http://files.ddnetbio.com/cardiac_monocle2.RData). This dataset was chosen in part because it shows a bifurcating cell fate of cardiac hESC differentiation that gives rise to definitive cardiomyocytes (Path1) or non-contractile cardiac derivatives (Path2) that allow for all aspect of GeneSwitches to be applied. 
 
 ```{r load data, message=FALSE}
 ## Download example files to current directory
@@ -53,8 +74,8 @@ load("./logexpdata.RData")
 load("./cardiac_monocle2.RData")
 ```
 
-##### Direct input
-Users can input the gene expression (logexpdata; recommend for log-normalized expression), pseudo-time (cell_pseudotime) and dimensionality reductions (rd_PCA; optional and only for gene expression plots) into SingleCellExperiment object as follows (not run).
+##### Direct input (not run)
+Users can input the gene expression (`logexpdata`; recommend for log-normalized expression), pseudo-time (`cell_pseudotime`) and dimensionality reductions (`rd_PCA`; optional and only for gene expression plots) into SingleCellExperiment object as follows.
 ```r
 ## create SingleCellExperiment object with log-normalized single cell data
 sce <- SingleCellExperiment(assays = List(expdata = logexpdata))
@@ -66,7 +87,7 @@ rd_PCA <- pca$x[,1:2]
 reducedDims(sce) <- SimpleList(PCA = rd_PCA)
 ```
 ##### Convert from trajectory results
-Alternatively, GeneSwitches provides functions to convert Monocle2 or Slingshot results into SingleCellExperiment object directly. For Monocle2 trajectory, users need to indicate the states of the desired path, which can be checked by plotting the trajectory using Monocle2 function "plot_cell_trajectory" or the following function.
+Alternatively, GeneSwitches provides functions to convert Monocle2 or Slingshot results into SingleCellExperiment object directly. For Monocle2 trajectory, users need to indicate the states of the desired path, which can be checked by plotting the trajectory using Monocle2 function `plot_cell_trajectory` or the following function.
 
 ```{r plot_monocle_trajectory, fig.height = 4, fig.width = 8, fig.align = "center"} 
 ## plot Monocle2 trajectory colored by State
@@ -129,7 +150,7 @@ sce_p1 <- find_switch_logistic_fastglm(sce_p1, downsample = TRUE, show_warning =
 
 ### I-3. Visualize ordering of switching genes
 
-First, we filter poorly fitted genes based on zero-expression percentage (>90%), FDR (>0.05) and McFadden's Pseudo R^2 (<0.03). We can then the number of top best fitting (high McFadden's Pseudo R^2) genes to plot. One can also extract specific gene type(s) to plot, with provided gene type lists containing surface proteins (downloaded from [here](http://wlab.ethz.ch/cspa/)) and transcription factors (TFs, downloaded from [here](http://humantfs.ccbr.utoronto.ca/)). Users are allowed to pass their own gene type lists as a data frame to parameter genelists, with rows as genes (non-duplicated) and two columns with name "genenames" and "genetypes".
+First, we filter poorly fitted genes based on zero-expression percentage (>90%), FDR (>0.05) and McFadden's Pseudo R^2 (<0.03). We can then the number of top best fitting (high McFadden's Pseudo R^2) genes to plot. One can also extract specific gene type(s) to plot, with provided gene type lists containing surface proteins (downloaded from [here](http://wlab.ethz.ch/cspa/)) and transcription factors (TFs, downloaded from [here](http://humantfs.ccbr.utoronto.ca/)). Users are allowed to pass their own gene type lists as a data frame to parameter genelists, with rows as genes (non-duplicated) and two columns with name `genenames` and `genetypes`.
 
 ```{r, message=FALSE}
 ## filter top 15 best fitting switching genes among all the genes
@@ -176,8 +197,7 @@ To better visualise the functional changes ridge plots of pathways genes show th
 ```{r pathways_ridge_plots, fig.height = 3, fig.width = 8, fig.align = "center"}
 plot_pathway_density(switch_pw_reduce[1:10,], sg_pw, orderbytime = TRUE)
 ```
-&nbsp;
-&nbsp;
+
 We can also select specific pathway(s) to plot the switching genes in it. Among top 10 significantly changed pathways, we plot genes related to myogenesis and cardiac muscle tissue development. 
 
 ```{r plot pathway genes, fig.height = 4.5, fig.width = 7, fig.align = "center"}
@@ -222,7 +242,7 @@ sg_disgs <- distinct_genes(sg_p1, sg_p2, r2cutoff = 0.52,
 plot_timeline_ggplot(sg_disgs, timedata = sce_p1$Pseudotime, color_by = "Paths", 
                      iffulltml = FALSE, txtsize = 3)
 ```
-&nbsp;
+
 We can also scale the timelines to be the same length (default number of bins is 100) so that differences are based on percentage of the trajectory covered rather than pseudo-time. 
 
 ```{r plot scale timeline, fig.height = 3.5, fig.width = 7, fig.align = "center"}
@@ -234,7 +254,7 @@ sg_disgs_scale <- distinct_genes(sg_p1, sg_p2, r2cutoff = 0.52,
 plot_timeline_ggplot(sg_disgs_scale, timedata = 1:100, color_by = "Paths", 
                      iffulltml = FALSE, txtsize = 3)
 ```
-&nbsp;
+
 These two plots for distinct switching genes only show a range of pseudo-timeline in which there are switching events happening. This range is actually at the end of trajectories, while common genes are mostly at the early period (common gene plot).  
 
 
@@ -248,4 +268,3 @@ p <- plot_gene_exp(sce_p2, geneofi = gn, reduction = "monocleRD",
                    downsample = FALSE, fitting = TRUE)
 ```
 
-TO DO Some concluding marks and contact details and also some troubleshooting ideas if there are things that have happened when people have installed
