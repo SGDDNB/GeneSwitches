@@ -16,13 +16,13 @@ take place.
 
 ## Installation
 
-##### Check and install required packages
+### Check and install required packages
 
 Users may use following codes to check and install all the required
 packages.
 
 ``` r
-list.of.packages <- c("SingleCellExperiment", "Biobase", "fastglm", "ggplot2",
+list.of.packages <- c("SingleCellExperiment", "Biobase", "fastglm", "ggplot2", "monocle",
                       "plyr", "RColorBrewer", "ggrepel", "ggridges", "gridExtra", "devtools")
 
 ## for package "fastglm", "ggplot2", "plyr", "RColorBrewer", "ggrepel", "ggridges", "gridExtra"
@@ -35,7 +35,7 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"
 if(length(new.packages)) BiocManager::install(new.packages)
 ```
 
-##### Install GeneSwitches
+### Install GeneSwitches
 
 The source code of GeneSwitches can be installed from
 [GitHub](https://github.com/) with:
@@ -82,7 +82,7 @@ load("./logexpdata.RData")
 load("./cardiac_monocle2.RData")
 ```
 
-##### Direct input (not run)
+### Direct input (NOT run)
 
 Users can input the gene expression (`logexpdata`; recommend for
 log-normalized expression), pseudo-time (`cell_pseudotime`) and
@@ -101,7 +101,7 @@ rd_PCA <- pca$x[,1:2]
 reducedDims(sce) <- SimpleList(PCA = rd_PCA)
 ```
 
-##### Convert from trajectory results
+### Convert from trajectory results
 
 Alternatively, GeneSwitches provides functions to convert Monocle2 or
 Slingshot results into SingleCellExperiment object directly. For
@@ -256,7 +256,7 @@ switching time.
 
 ``` r
 plot_pathway_density(switch_pw_reduce[1:10,], sg_pw, orderbytime = TRUE)
-#> Picking joint bandwidth of 2.08
+#> Picking joint bandwidth of 2.2
 ```
 
 <img src="man/figures/README-pathways_ridge_plots-1.png" style="display: block; margin: auto;" />
