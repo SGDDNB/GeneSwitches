@@ -8,6 +8,7 @@
 #'
 downsample_zeros <- function(glmdata, ratio_ds = 0.7) {
   p = as.numeric(ratio_ds)
+  set.seed(42)   # Set seed for consistency
   downsample <- sample(which(glmdata$State == 0), length(which(glmdata$State == 0)) - round(sum(glmdata$State != 0) * p/(1 - p)))
   if (length(downsample) > 0) {
     subdata <- glmdata[-downsample, ]
@@ -20,19 +21,22 @@ downsample_zeros <- function(glmdata, ratio_ds = 0.7) {
 #' @description This function fits fast logistic regression and find switching timepoint for each gene
 #'
 #' @param sce SingleCellExperiment
-#' @param downsample if do random downsampling of zeros
+#' @param downsample Logical. if do random downsampling of zeros
 #' @param ds_cutoff only do downsampling if zero percentage is over this cutoff
 #' @param zero_ratio downsampling zeros to this proportion
 #' @param sig_FDR FDR cut off for significant genes
-#' @param zero_pct zero-expression percentage cut off for significant genes
 #' @return
 #'
 #' @import fastglm
 #' @export
 #'
 find_switch_logistic_fastglm <- function(sce, downsample = FALSE, ds_cutoff = 0.7, zero_ratio = 0.7,
-                                         sig_FDR = 0.05, zero_pct = 0.9, show_warnings = TRUE) {
+                                         sig_FDR = 0.05, show_warnings = TRUE) {
   binarydata <- assays(sce)$binary
+  expdata <- assays(sce)$expdata
+  binarydata <- binarydata[which(rowData(sce)$passBinary == TRUE), ]
+  expdata <- expdata[which(rowData(sce)$passBinary == TRUE), ]
+  genes <- rowData(sce)[which(rowData(sce)$passBinary == TRUE), ]
   timedata <- sce$Pseudotime
   pvalues <- binarydata[, 1]
   pseudoR2s <- binarydata[, 1]
@@ -41,11 +45,11 @@ find_switch_logistic_fastglm <- function(sce, downsample = FALSE, ds_cutoff = 0.
   prd_quality <- binarydata[, 1]
 
   for (i in 1:nrow(binarydata)) {
-    glmdata <- cbind(State = as.numeric(binarydata[i, ]), expvalue = as.numeric(assays(sce)$expdata[i, ]),
+    glmdata <- cbind(State = as.numeric(binarydata[i, ]), expvalue = as.numeric(expdata[i, ]),
                      timedata = sce$Pseudotime)
     glmdata <- as.data.frame(glmdata)
 
-    if (downsample == TRUE & round(sum(glmdata$State == 0)/nrow(glmdata),3) > ds_cutoff) {
+    if (downsample == TRUE & round(genes$zerop_gene[i],3) > ds_cutoff) {
       glmdata <- downsample_zeros(glmdata, ratio_ds = zero_ratio)
     }
 
@@ -91,20 +95,11 @@ find_switch_logistic_fastglm <- function(sce, downsample = FALSE, ds_cutoff = 0.
   if (max(result_switch$FDR) > sig_FDR) {
     result_switch[result_switch$FDR > sig_FDR, ]$prd_quality <- 0
   }
-  # calculate zero percentage
-  zerop_g <- c()
-  for (i in 1:nrow(binarydata)) {
-    zp <- length(which(binarydata[i, ] == 0))/ncol(binarydata)
-    zerop_g <- c(zerop_g, zp)
-  }
-  result_switch$zerop_gene <- zerop_g
-  # filter genes with >90% zero_pct
-  fltg1 <- which(result_switch$zerop_gene > zero_pct)
-  if (length(fltg1 > 0)) {
-    result_switch[fltg1, ]$prd_quality <- 0
-  }
 
-  rowData(sce) <- result_switch
+  geneinfo <- merge(rowData(sce), result_switch, by=0, all=TRUE)[,-1] #[,1:11]
+  rownames(geneinfo) <- geneinfo$geneID
+  geneinfo <- geneinfo[rownames(sce), ]
+  rowData(sce) <- geneinfo
   return(sce)
 }
 

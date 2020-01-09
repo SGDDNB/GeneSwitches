@@ -7,6 +7,7 @@
 #' @param pathway_name a list of pathway name(s) to plot
 #' @param genelists a gene list to plot
 #' @param genetype specific gene type to plot c("EMT", "reprogramming", "stem", "surface", "TF")
+#' @param zero_pct zero-expression percentage cut off for significant genes
 #' @param r2cutoff pseudo R^2 cutoff
 #' @param direction switching direction, up or down
 #' @param topnum number of top genes ordered by pseudo R^2 value
@@ -16,7 +17,7 @@
 #' @export
 #'
 filter_switchgenes <- function(sce, allgenes = FALSE, pathway_name = NULL, genelists = GeneSwitches:::genelists,
-                               genetype = c("Surface proteins", "TFs"),
+                               genetype = c("Surface proteins", "TFs"), zero_pct = 0.9,
                                r2cutoff = 0.03, direction = c("up", "down"), topnum = 100000) {
   if (allgenes == TRUE) {
     toplotgl <- rowData(sce)
@@ -54,7 +55,7 @@ filter_switchgenes <- function(sce, allgenes = FALSE, pathway_name = NULL, genel
     toplotgl$feature_type <- genelists_sub[genestoplot, ]$genetypes
   }
 
-  toplotgl_sub <- toplotgl[toplotgl$prd_quality == 1 & toplotgl$pseudoR2s > r2cutoff &
+  toplotgl_sub <- toplotgl[toplotgl$zerop_gene < zero_pct & toplotgl$prd_quality == 1 & toplotgl$pseudoR2s > r2cutoff &
                            toplotgl$direction %in% direction, ]
   if (nrow(toplotgl_sub) > topnum) {
     toplotgl_sub <- toplotgl_sub[order(toplotgl_sub$pseudoR2s, decreasing = TRUE),]
