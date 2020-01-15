@@ -10,6 +10,8 @@ convert_slingshot(sce_slingshot, pseudotime_idx, assayname = "expdata")
 \item{sce_slingshot}{slingshot SingleCellExperiment output object}
 
 \item{pseudotime_idx}{name of desired pseudotime path to apply GeneSwitches}
+
+\item{assayname}{expression assay to use}
 }
 \value{
 

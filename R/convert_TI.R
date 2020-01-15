@@ -80,6 +80,7 @@ convert_monocle2 <- function(monocle2_obj, states, expdata){
 #'
 #' @param sce_slingshot slingshot SingleCellExperiment output object
 #' @param pseudotime_idx name of desired pseudotime path to apply GeneSwitches
+#' @param assayname expression assay to use
 #' @return
 #'
 #' @export
@@ -101,4 +102,26 @@ convert_slingshot <- function(sce_slingshot, pseudotime_idx, assayname = "expdat
   names(reducedDims(sce)) <- names(reducedDims(sce_slingshot))
 
   return(sce)
+}
+
+
+#' @title Subset GeneSwitches object based on the range of pseudotime
+#'
+#' @description This function subsets GeneSwitches object based on the range of pseudotime
+#'
+#' @param sce GeneSwitches object which is a SingleCellExperiment object
+#' @param min_time lower bound of pseudotime
+#' @param max_time upper bound of pseudotime
+#' @param assayname expression assay to use
+#' @param minexp minimun expression to filer genes
+#' @param mincells minimun cells with expression
+#' @return
+#'
+#' @export
+#'
+subset_pseudotime <- function(sce, min_time, max_time, assayname = "expdata", minexp = 0, mincells = 10){
+  sce_subset <- sce[,sce$Pseudotime >= min_time & sce$Pseudotime <= max_time]
+  # all(rownames(sce_p1_subset) == rownames(rowData(sce_p1_subset)))
+  sce_subset <- sce_subset[which(apply(assays(sce_subset)[[assayname]] > minexp, 1 ,sum) >= mincells), ]
+  return(sce_subset)
 }

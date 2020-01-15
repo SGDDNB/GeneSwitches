@@ -9,7 +9,7 @@
 downsample_zeros <- function(glmdata, ratio_ds = 0.7) {
   p = as.numeric(ratio_ds)
   set.seed(42)   # Set seed for consistency
-  downsample <- sample(which(glmdata$State == 0), length(which(glmdata$State == 0)) - round(sum(glmdata$State != 0) * p/(1 - p)))
+  downsample <- sample(which(glmdata$expvalue == 0), length(which(glmdata$expvalue == 0)) - round(sum(glmdata$expvalue != 0) * p/(1 - p)))
   if (length(downsample) > 0) {
     subdata <- glmdata[-downsample, ]
   } else {subdata <- glmdata}
@@ -98,6 +98,7 @@ find_switch_logistic_fastglm <- function(sce, downsample = FALSE, ds_cutoff = 0.
 
   geneinfo <- merge(rowData(sce), result_switch, by=0, all=TRUE)[,-1] #[,1:11]
   rownames(geneinfo) <- geneinfo$geneID
+  # all(rownames(geneinfo) == rownames(sce))
   geneinfo <- geneinfo[rownames(sce), ]
   rowData(sce) <- geneinfo
   return(sce)

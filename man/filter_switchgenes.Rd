@@ -6,8 +6,8 @@
 \usage{
 filter_switchgenes(sce, allgenes = FALSE, pathway_name = NULL,
   genelists = GeneSwitches:::genelists,
-  genetype = c("Surface proteins", "TFs"), r2cutoff = 0.03,
-  direction = c("up", "down"), topnum = 1e+05)
+  genetype = c("Surface proteins", "TFs"), zero_pct = 0.9,
+  r2cutoff = 0.03, direction = c("up", "down"), topnum = 1e+05)
 }
 \arguments{
 \item{sce}{switching genes}
@@ -19,6 +19,8 @@ filter_switchgenes(sce, allgenes = FALSE, pathway_name = NULL,
 \item{genelists}{a gene list to plot}
 
 \item{genetype}{specific gene type to plot c("EMT", "reprogramming", "stem", "surface", "TF")}
+
+\item{zero_pct}{zero-expression percentage cut off for significant genes}
 
 \item{r2cutoff}{pseudo R^2 cutoff}
 

@@ -23,9 +23,10 @@ packages.
 
 ``` r
 list.of.packages <- c("SingleCellExperiment", "Biobase", "fastglm", "ggplot2", "monocle",
-                      "plyr", "RColorBrewer", "ggrepel", "ggridges", "gridExtra", "devtools")
+                      "plyr", "RColorBrewer", "ggrepel", "ggridges", "gridExtra", "devtools",
+                      "mixtools")
 
-## for package "fastglm", "ggplot2", "plyr", "RColorBrewer", "ggrepel", "ggridges", "gridExtra"
+## for package "fastglm", "ggplot2", "plyr", "RColorBrewer", "ggrepel", "ggridges", "gridExtra", "mixtools"
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -91,14 +92,14 @@ expression plots) into SingleCellExperiment object as
 follows.
 
 ``` r
-## create SingleCellExperiment object with log-normalized single cell data
-sce <- SingleCellExperiment(assays = List(expdata = logexpdata))
-## add pseudo-time information
-colData(sce)$Pseudotime <- cell_pseudotime
-## add dimensionality reductions, e.g. PCA, UMAP, tSNE
-pca <- prcomp(t(assays(sce)$expdata), scale. = FALSE)
-rd_PCA <- pca$x[,1:2]
-reducedDims(sce) <- SimpleList(PCA = rd_PCA)
+### create SingleCellExperiment object with log-normalized single cell data
+#sce <- SingleCellExperiment(assays = List(expdata = logexpdata))
+### add pseudo-time information
+#colData(sce)$Pseudotime <- cell_pseudotime
+### add dimensionality reductions, e.g. PCA, UMAP, tSNE
+#pca <- prcomp(t(assays(sce)$expdata), scale. = FALSE)
+#rd_PCA <- pca$x[,1:2]
+#reducedDims(sce) <- SimpleList(PCA = rd_PCA)
 ```
 
 ### Convert from trajectory results
@@ -134,6 +135,16 @@ sce_p2 <- convert_monocle2(monocle2_obj = cardiac_monocle2,
                            states = c(3,2,5), expdata = logexpdata)
 ```
 
+If we are only interested in the trajectory within a certain range of
+pseudotime, function `subset_pseudotime` can be used to subset the
+SingleCellExperiment object accordingly, followed by filtering out lowly
+expressed genes.
+
+``` r
+### Subset cells to pseudotime range from 10 to 25
+#sce_p1_subset <- subset_pseudotime(sce_p1, min_time = 10, max_time = 25, minexp = 0, mincells = 10)
+```
+
 In Part I, we will apply GeneSwitches on a single trajectory, Path1, to
 demonstrate the general workflow and functions. Comparison of
 GeneSwitches results from two trajectories (Path1 & 2) will be shown in
@@ -144,28 +155,35 @@ Part II.
 ### I-1. Binarize gene expression
 
 Since we focus on the genes that are either switched on or off, we first
-binarize the gene expression data into 1(on) or 0(off) state using a
-global threshold. We plot a histogram of expression of all the genes in
-all cells and look for a break between the zero and expressed
-distributions to identify the global threshold.
+binarize the gene expression data into 1(on) or 0(off) state. To achieve
+this, for each gene, we fit a mixture model of two gaussian
+distributions to the input gene expression to calculates gene-specific
+thresholds for binarization. Prior to fitting, we add gaussian noise
+with zero mean and 0.1 standard deviation to the gene expression, which
+ensures numerical stability in the fitting of the gene expression. Genes
+that do not have a distinct bimodal “on-off” distribution are then
+removed. This step may take 2 minutes for 2000 cells using 3 cores.
 
 ``` r
-# check the threshold for binarization
-h <- hist(assays(sce_p1)$expdata, breaks = 200, plot = FALSE)
-{plot(h, freq = FALSE, xlim = c(0,2), ylim = c(0,1), main = "Histogram of gene expression", 
-     xlab = "Gene expression", col = "darkgoldenrod2", border = "grey")
-abline(v=0.2, col="blue")}
+# binarize gene expression using gene-specific thresholds
+sce_p1 <- binarize_exp(sce_p1, ncores = 3)
 ```
 
-<img src="man/figures/README-binarization_threshold-1.png" style="display: block; margin: auto;" />
-
-In this example, we choose 0.2 (blue line, also set as default) as the
-threshold.
+Alternatively, we can use a global threshold for fast binarization. We
+plot a histogram of expression of all the genes in all cells and look
+for a break between the zero and expressed distributions to identify the
+global threshold.
 
 ``` r
-# binarize gene expression
-bn_cutoff <- 0.2
-sce_p1 <- binarize_exp(sce_p1, binarize_cutoff = bn_cutoff)
+### check the threshold for binarization
+#h <- hist(assays(sce_p1)$expdata, breaks = 200, plot = FALSE)
+#{plot(h, freq = FALSE, xlim = c(0,2), ylim = c(0,1), main = "Histogram of gene expression",
+#xlab = "Gene expression", col = "darkgoldenrod2", border = "grey")
+#abline(v=0.2, col="blue")}
+
+###In this example, we choose 0.2 (blue line, also set as default) as the threshold.
+#bn_cutoff <- 0.2
+#sce_p1 <- binarize_exp(sce_p1, fix_cutoff = TRUE, binarize_cutoff = bn_cutoff)
 ```
 
 ### I-2. Fit logistic regression & estimate switching time
@@ -179,7 +197,7 @@ inflation.
 
 ``` r
 ## fit logistic regression and find the switching pseudo-time point for each gene
-## with downsampling. This step takes around 1 mins
+## with downsampling. This step takes less than 1 mins
 sce_p1 <- find_switch_logistic_fastglm(sce_p1, downsample = TRUE, show_warning = FALSE)
 ```
 
@@ -223,7 +241,7 @@ plots if
 needed.
 
 ``` r
-plot_gene_exp(sce_p1, geneofi = "VIM", reduction = "monocleRD", downsample = T)
+plot_gene_exp(sce_p1, geneofi = "VIM", reduction = "monocleRD", downsample = F)
 ```
 
 <img src="man/figures/README-plotexp-1.png" style="display: block; margin: auto;" />
@@ -256,7 +274,7 @@ switching time.
 
 ``` r
 plot_pathway_density(switch_pw_reduce[1:10,], sg_pw, orderbytime = TRUE)
-#> Picking joint bandwidth of 2.2
+#> Picking joint bandwidth of 2.5
 ```
 
 <img src="man/figures/README-pathways_ridge_plots-1.png" style="display: block; margin: auto;" />
@@ -268,7 +286,7 @@ development.
 
 ``` r
 sg_vis <- filter_switchgenes(sce_p1, topnum = 50, pathway_name = c("HALLMARK_MYOGENESIS",
-                                                                   "GO_CARDIAC_MUSCLE_TISSUE_DEVELOPMENT"))
+                                                                "GO_CARDIAC_MUSCLE_TISSUE_DEVELOPMENT"))
 plot_timeline_ggplot(sg_vis, timedata=sce_p1$Pseudotime, txtsize=3)
 ```
 
@@ -345,6 +363,7 @@ Similarly, we can check the gene expression plots for the two paths.
 gn <- "DCN"
 p <- plot_gene_exp(sce_p1, geneofi = gn, reduction = "monocleRD", 
                    downsample = FALSE, fitting = TRUE)
+#> Warning: glm.fit: algorithm did not converge
 ```
 
 <img src="man/figures/README-plot_exp1-1.png" style="display: block; margin: auto;" />

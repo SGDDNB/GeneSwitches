@@ -17,7 +17,8 @@ Imports:
     SingleCellExperiment (>= 1.6.0), 
     ggplot2 (>= 3.1.0),
     RColorBrewer,
-    plyr
+    plyr,
+    mixtools
 RoxygenNote: 6.1.1.9000
 Suggests: 
     testthat

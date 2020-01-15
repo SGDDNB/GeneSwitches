@@ -5,21 +5,18 @@
 \title{Fit fast logistic regression and find switching timepoint}
 \usage{
 find_switch_logistic_fastglm(sce, downsample = FALSE, ds_cutoff = 0.7,
-  zero_ratio = 0.7, sig_FDR = 0.05, zero_pct = 0.9,
-  show_warnings = TRUE)
+  zero_ratio = 0.7, sig_FDR = 0.05, show_warnings = TRUE)
 }
 \arguments{
 \item{sce}{SingleCellExperiment}
 
-\item{downsample}{if do random downsampling of zeros}
+\item{downsample}{Logical. if do random downsampling of zeros}
 
 \item{ds_cutoff}{only do downsampling if zero percentage is over this cutoff}
 
 \item{zero_ratio}{downsampling zeros to this proportion}
 
 \item{sig_FDR}{FDR cut off for significant genes}
-
-\item{zero_pct}{zero-expression percentage cut off for significant genes}
 }
 \value{
 

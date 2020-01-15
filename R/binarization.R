@@ -13,11 +13,11 @@
 #' @param ncores number of cores
 #' @return
 #'
+#' @import parallel
+#' @importFrom mixtools normalmixEM
 #' @export
 #'
-#' @import parallel
-#' @import mixtools
-binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores = 4) {
+binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores = 3) {
   # calculate zero percentage
   zerop_g <- c()
   expdata <- assays(sce)$expdata
@@ -25,7 +25,6 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     zp <- length(which(expdata[i, ] == 0))/ncol(expdata)
     zerop_g <- c(zerop_g, zp)
   }
-  # result_switch$zerop_gene <- zerop_g
 
   if (fix_cutoff == TRUE) {
     expdata <- assays(sce)$expdata
@@ -33,8 +32,10 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     exp_reduced_binary <- as.matrix((expdata > binarize_cutoff) + 0)
     exp_reduced_binary[is.na(exp_reduced_binary)] = 0
     assays(sce)$binary <- exp_reduced_binary
-    rowData(sce)$zerop_gene <- zerop_g
-    rowData(sce)$passBinary <- TRUE
+    oupBinary <- data.frame(geneID = rownames(sce),
+                            zerop_gene = zerop_g,
+                            passBinary = TRUE)
+    rowData(sce) <- oupBinary
   } else {
     expdata <- assays(sce)$expdata
     # Add gaussian noise to gene expression matrix

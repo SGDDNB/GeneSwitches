@@ -4,10 +4,17 @@
 \alias{binarize_exp}
 \title{Binarize gene expression}
 \usage{
-binarize_exp(sce, binarize_cutoff = 0.2)
+binarize_exp(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2,
+  ncores = 3)
 }
 \arguments{
 \item{sce}{SingleCellExperiment}
+
+\item{fix_cutoff}{Logical. if use fixed global cutoff for binarization, default FALSE}
+
+\item{binarize_cutoff}{fixed global cutoff for binarization, default 0.2}
+
+\item{ncores}{number of cores}
 }
 \value{
 
