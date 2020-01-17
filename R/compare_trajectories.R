@@ -31,7 +31,12 @@ distinct_genes <- function(toplotgl_Rsub1, toplotgl_Rsub2, path1name = "Path1Gen
     gs_p2$switch_at_time <- round((gs_p2$switch_at_time - min(path2time))/steptime2)
   }
   # combine distinct gene into one dataframe
-  toplotgl <- rbind(gs_p1, gs_p2)
+  toplotgl <- rbind(gs_p1[,c("geneID","zerop_gene","switch_at_time","pvalues","FDR","pseudoR2s",
+                             "estimates","prd_quality","direction","switch_at_timeidx",
+                             "genenames","Paths")],
+                    gs_p2[,c("geneID","zerop_gene","switch_at_time","pvalues","FDR","pseudoR2s",
+                             "estimates","prd_quality","direction","switch_at_timeidx",
+                             "genenames","Paths")])
   toplotgl <- toplotgl[toplotgl$pseudoR2s > r2cutoff,]
   return(toplotgl)
 }
@@ -67,7 +72,12 @@ common_genes <- function(toplotgl_Rsub1, toplotgl_Rsub2, path1name = "Path1Genes
 
   toplotgl_Rsub1$genetype <- path1name
   toplotgl_Rsub2$genetype <- path2name
-  ggData <- as.data.frame(rbind(toplotgl_Rsub1[comgl,], toplotgl_Rsub2[comgl,]))
+  ggData <- as.data.frame(rbind(toplotgl_Rsub1[comgl, c("geneID","zerop_gene","switch_at_time","pvalues","FDR","pseudoR2s",
+                                                        "estimates","prd_quality","direction","switch_at_timeidx",
+                                                        "genenames","genetype")],
+                                toplotgl_Rsub2[comgl, c("geneID","zerop_gene","switch_at_time","pvalues","FDR","pseudoR2s",
+                                                        "estimates","prd_quality","direction","switch_at_timeidx",
+                                                        "genenames","genetype")]))
   ggData$genetype <- factor(ggData$genetype, levels = c(path1name, path2name))
   return(ggData)
 }

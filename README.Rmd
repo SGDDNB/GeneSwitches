@@ -123,7 +123,7 @@ In Part I, we will apply GeneSwitches on a single trajectory, Path1, to demonstr
 Since we focus on the genes that are either switched on or off, we first binarize the gene expression data into 1(on) or 0(off) state. To achieve this, for each gene, we fit a mixture model of two gaussian distributions to the input gene expression to calculates gene-specific thresholds for binarization. Prior to fitting, we add gaussian noise with zero mean and 0.1 standard deviation to the gene expression, which ensures numerical stability in the fitting of the gene expression. Genes that do not have a distinct bimodal “on-off” distribution are then removed. This step may take 2 minutes for 2000 cells using 3 cores. 
 
 ```{r binarization1}
-# binarize gene expression using gene-specific thresholds
+### binarize gene expression using gene-specific thresholds
 sce_p1 <- binarize_exp(sce_p1, ncores = 3)
 ```
 
@@ -137,8 +137,8 @@ Alternatively, we can use a global threshold for fast binarization. We plot a hi
 #abline(v=0.2, col="blue")}
 
 ###In this example, we choose 0.2 (blue line, also set as default) as the threshold.
-#bn_cutoff <- 0.2
-#sce_p1 <- binarize_exp(sce_p1, fix_cutoff = TRUE, binarize_cutoff = bn_cutoff)
+# bn_cutoff <- 0.2
+# sce_p1 <- binarize_exp(sce_p1, fix_cutoff = TRUE, binarize_cutoff = bn_cutoff)
 ```
 
 ### I-2. Fit logistic regression & estimate switching time
@@ -180,7 +180,7 @@ plot_timeline_ggplot(sg_vis, timedata = sce_p1$Pseudotime, txtsize = 3)
 It is possible to use the dimensionality reduction provided from the user to visualise the gene expression and logistic regression fitting plots if needed.
 
 ```{r plotexp, fig.height = 2.7, fig.width = 3.5, fig.align = "center"}
-plot_gene_exp(sce_p1, geneofi = "VIM", reduction = "monocleRD", downsample = F)
+plot_gene_exp(sce_p1, gene = "VIM", reduction = "monocleRD", downsample = F)
 ```
 
 
@@ -268,11 +268,11 @@ These two plots for distinct switching genes only show a range of pseudo-timelin
 
 Similarly, we can check the gene expression plots for the two paths.
 
-```{r plot_exp1, fig.height = 3, fig.width = 7, fig.align = "center"}
+```{r plot_exp1, fig.height = 4, fig.width = 12, fig.align = "center"}
 gn <- "DCN"
-p <- plot_gene_exp(sce_p1, geneofi = gn, reduction = "monocleRD", 
+p <- plot_gene_exp(sce_p1, gene = gn, reduction = "monocleRD", 
                    downsample = FALSE, fitting = TRUE)
-p <- plot_gene_exp(sce_p2, geneofi = gn, reduction = "monocleRD", 
+p <- plot_gene_exp(sce_p2, gene = gn, reduction = "monocleRD", 
                    downsample = FALSE, fitting = TRUE)
 ```
 

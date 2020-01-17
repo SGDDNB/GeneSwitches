@@ -165,7 +165,7 @@ that do not have a distinct bimodal “on-off” distribution are then
 removed. This step may take 2 minutes for 2000 cells using 3 cores.
 
 ``` r
-# binarize gene expression using gene-specific thresholds
+### binarize gene expression using gene-specific thresholds
 sce_p1 <- binarize_exp(sce_p1, ncores = 3)
 ```
 
@@ -182,8 +182,8 @@ global threshold.
 #abline(v=0.2, col="blue")}
 
 ###In this example, we choose 0.2 (blue line, also set as default) as the threshold.
-#bn_cutoff <- 0.2
-#sce_p1 <- binarize_exp(sce_p1, fix_cutoff = TRUE, binarize_cutoff = bn_cutoff)
+# bn_cutoff <- 0.2
+# sce_p1 <- binarize_exp(sce_p1, fix_cutoff = TRUE, binarize_cutoff = bn_cutoff)
 ```
 
 ### I-2. Fit logistic regression & estimate switching time
@@ -241,7 +241,7 @@ plots if
 needed.
 
 ``` r
-plot_gene_exp(sce_p1, geneofi = "VIM", reduction = "monocleRD", downsample = F)
+plot_gene_exp(sce_p1, gene = "VIM", reduction = "monocleRD", downsample = F)
 ```
 
 <img src="man/figures/README-plotexp-1.png" style="display: block; margin: auto;" />
@@ -274,7 +274,7 @@ switching time.
 
 ``` r
 plot_pathway_density(switch_pw_reduce[1:10,], sg_pw, orderbytime = TRUE)
-#> Picking joint bandwidth of 2.5
+#> Picking joint bandwidth of 2.49
 ```
 
 <img src="man/figures/README-pathways_ridge_plots-1.png" style="display: block; margin: auto;" />
@@ -361,7 +361,7 @@ Similarly, we can check the gene expression plots for the two paths.
 
 ``` r
 gn <- "DCN"
-p <- plot_gene_exp(sce_p1, geneofi = gn, reduction = "monocleRD", 
+p <- plot_gene_exp(sce_p1, gene = gn, reduction = "monocleRD", 
                    downsample = FALSE, fitting = TRUE)
 #> Warning: glm.fit: algorithm did not converge
 ```
@@ -369,7 +369,7 @@ p <- plot_gene_exp(sce_p1, geneofi = gn, reduction = "monocleRD",
 <img src="man/figures/README-plot_exp1-1.png" style="display: block; margin: auto;" />
 
 ``` r
-p <- plot_gene_exp(sce_p2, geneofi = gn, reduction = "monocleRD", 
+p <- plot_gene_exp(sce_p2, gene = gn, reduction = "monocleRD", 
                    downsample = FALSE, fitting = TRUE)
 ```
 
