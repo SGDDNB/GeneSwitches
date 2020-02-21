@@ -66,7 +66,7 @@ convert_monocle2 <- function(monocle2_obj, states, expdata){
   # pass pseudotime info
   colData(sce)$Pseudotime <- cells$Pseudotime
   # pass reduced dims info
-  rd <- t(cardiac_monocle2@reducedDimS)[rownames(cells),]
+  rd <- t(monocle2_obj@reducedDimS)[rownames(cells),]
   colnames(rd) <- c("Component 1", "Component 2")
   reducedDims(sce) <- SimpleList(monocleRD=rd)
 
