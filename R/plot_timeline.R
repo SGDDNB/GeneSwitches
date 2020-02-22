@@ -16,7 +16,7 @@
 #' @import plyr
 #' @export
 #'
-filter_switchgenes <- function(sce, allgenes = FALSE, pathway_name = NULL, genelists = GeneSwitches:::genelists,
+filter_switchgenes <- function(sce, allgenes = FALSE, pathway_name = NULL, genelists = GeneSwitches:::gs_genelists,
                                genetype = c("Surface proteins", "TFs"), zero_pct = 0.9,
                                r2cutoff = 0.03, direction = c("up", "down"), topnum = 100000) {
   if (allgenes == TRUE) {
