@@ -73,7 +73,9 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     oupBinary$passBinary = TRUE
     oupBinary[oupBinary$lambda1 < 0.1, ]$passBinary = FALSE
     oupBinary[oupBinary$lambda2 < 0.1, ]$passBinary = FALSE
-    oupBinary[(as.numeric(oupBinary$mu2) - as.numeric(oupBinary$mu1)) < ( as.numeric(oupBinary$sigma1) + as.numeric(oupBinary$sigma2) ), ]$passBinary = FALSE
+    no_pass_binary <- c(as.numeric(oupBinary$mu2) - as.numeric(oupBinary$mu1)) < c( as.numeric(oupBinary$sigma1) + as.numeric(oupBinary$sigma2) )
+    no_pass_binary[is.na(no_pass_binary)] <- T
+    oupBinary[no_pass_binary, ]$passBinary = FALSE
     # table(oupBinary$passBinary)
 
     # Solve for intersection for remaining genes
