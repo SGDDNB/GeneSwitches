@@ -41,20 +41,13 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     # Add gaussian noise to gene expression matrix
     # Here we use a sd of 0.1
     LogCountsadd = expdata + matrix(rnorm(nrow(expdata)*ncol(expdata),
-                                             mean = 0, sd = 0.1),
-                                       nrow(expdata), ncol(expdata))
+                                          mean = 0, sd = 0.1),
+                                    nrow(expdata), ncol(expdata))
     # Start fitting mixture models for each gene
     oupBinary = do.call(
       rbind, mclapply(rownames(LogCountsadd), function(iGene){
         set.seed(42)   # Set seed for consistency
-        tmpMix = try(normalmixEM(LogCountsadd[iGene, ], k = 2))
-        if (inherits(tmpMix, 'try-error')) {
-          tmpOup = data.frame(
-            geneID = iGene,
-            mu1 = NA, mu2 = NA, 
-            sigma1=NA, sigma2=NA, lambda1=NA, lambda2=NA, loglik=NA)
-          return(tmpOup)
-        }
+        tmpMix = normalmixEM(LogCountsadd[iGene, ], k = 2)
         if (tmpMix$mu[1] < tmpMix$mu[2]) {
           tmpOup = data.frame(geneID = iGene,
                               mu1 = tmpMix$mu[1],
@@ -76,13 +69,12 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
         }
         return(tmpOup)
       }, mc.cores = ncores))
+
     # Check if non-bimodal genes
     oupBinary$passBinary = TRUE
     oupBinary[oupBinary$lambda1 < 0.1, ]$passBinary = FALSE
     oupBinary[oupBinary$lambda2 < 0.1, ]$passBinary = FALSE
-    no_pass_binary <- c(oupBinary$mu2 - oupBinary$mu1) < c(oupBinary$sigma1 + oupBinary$sigma2)
-    no_pass_binary[is.na(no_pass_binary)] <- T
-    oupBinary[no_pass_binary, ]$passBinary = FALSE
+    oupBinary[(oupBinary$mu2 - oupBinary$mu1) < (oupBinary$sigma1 + oupBinary$sigma2), ]$passBinary = FALSE
     # table(oupBinary$passBinary)
 
     # Solve for intersection for remaining genes
