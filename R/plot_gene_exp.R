@@ -3,7 +3,7 @@
 #' @description This function plot gene expression on two-dimensional space
 #'
 #' @param sce SingleCellExperiment
-#' @param geneofi one gene of interest
+#' @param gene one gene of interest
 #' @param reduction dimensional reduction method
 #' @param downsample if do random downsampling of zeros
 #' @param ds_cutoff only do downsampling if zero percentage is over this cutoff
@@ -27,7 +27,7 @@ plot_gene_exp <- function(sce, gene, reduction, fitting = FALSE, bin_width = 0.1
 
   if (downsample == TRUE & round(sum(glmdata$expvalue == 0)/nrow(glmdata),3) > ds_cutoff) {
     glmdata <- downsample_zeros(glmdata, ratio_ds = zero_ratio)
-    geneofi <- paste0(geneofi, " (downsampled--",zero_ratio*100,"%)")
+    gene <- paste0(gene, " (downsampled--",zero_ratio*100,"%)")
   }
 
   # Define plot theme
