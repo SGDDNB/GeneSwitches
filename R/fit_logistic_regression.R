@@ -43,6 +43,7 @@ find_switch_logistic_fastglm <- function(sce, downsample = FALSE, ds_cutoff = 0.
   estimates <- binarydata[, 1]
   switch_at_time <- binarydata[, 1]
   prd_quality <- binarydata[, 1]
+  CI <- binarydata[, 1]
 
   for (i in 1:nrow(binarydata)) {
     glmdata <- cbind(State = as.numeric(binarydata[i, ]), expvalue = as.numeric(expdata[i, ]),
@@ -78,10 +79,13 @@ find_switch_logistic_fastglm <- function(sce, downsample = FALSE, ds_cutoff = 0.
       switch_at_time[i] = min(glmdata$timedata)
       prd_quality[i] = 0
     }
+    se <- summary(glm_results)$coefficients[, 2]
+    CI[i] <- sqrt((se[1]*1.96/coef(glm_results)[1])^2 + (se[2]*1.96/coef(glm_results)[2])^2)*
+      abs(coef(glm_results)[1]/coef(glm_results)[2])
     remove(glm_results)
   }
 
-  result_switch <- cbind(switch_at_time, pvalues, pseudoR2s, estimates, prd_quality)
+  result_switch <- cbind(switch_at_time, CI, pvalues, pseudoR2s, estimates, prd_quality)
   rownames(result_switch) <- rownames(binarydata)
   result_switch <- as.data.frame(result_switch)
   result_switch$direction <- "up"
