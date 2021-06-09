@@ -19,12 +19,14 @@
 #'
 binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores = 3) {
   # calculate zero percentage
-  zerop_g <- c()
+  #zerop_g <- c()
   expdata <- assays(sce)$expdata
-  for (i in 1:nrow(expdata)) {
-    zp <- length(which(expdata[i, ] == 0))/ncol(expdata)
-    zerop_g <- c(zerop_g, zp)
-  }
+  #for (i in 1:nrow(expdata)) {
+  #  zp <- length(which(expdata[i, ] == 0))/ncol(expdata)
+  #  zerop_g <- c(zerop_g, zp)
+  #}
+  zerop_g <- apply(expdata==0, 1, sum)
+  zerop_g <- zerop_g/ncol(expdata)
 
   if (fix_cutoff == TRUE) {
     expdata <- assays(sce)$expdata
