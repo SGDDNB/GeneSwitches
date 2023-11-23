@@ -44,8 +44,9 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
                                           mean = 0, sd = 0.1),
                                     nrow(expdata), ncol(expdata))
     # Start fitting mixture models for each gene
+    cl <- parallel::makeCluster(ncores)
     oupBinary = do.call(
-      rbind, mclapply(rownames(LogCountsadd), function(iGene){
+      rbind, parallel::parLapply(cl = cl, X = rownames(LogCountsadd), fun = function(iGene){
         set.seed(42)   # Set seed for consistency
         tmpMix = normalmixEM(LogCountsadd[iGene, ], k = 2)
         if (tmpMix$mu[1] < tmpMix$mu[2]) {
@@ -68,7 +69,9 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
                               loglik = tmpMix$loglik)
         }
         return(tmpOup)
-      }, mc.cores = ncores))
+      }))
+    # Stop the cluster
+    parallel::stopCluster(cl)
 
     # Check if non-bimodal genes
     oupBinary$passBinary = TRUE
