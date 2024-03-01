@@ -32,6 +32,27 @@ downsample_zeros <- function(glmdata, ratio_ds = 0.7) {
 #'
 find_switch_logistic_fastglm <- function(sce, downsample = FALSE, ds_cutoff = 0.7, zero_ratio = 0.7,
                                          sig_FDR = 0.05, show_warnings = TRUE) {
+
+  # Check if 'sce' is a SingleCellExperiment object
+  if (!("SingleCellExperiment" %in% class(sce))) {
+    stop("class(sce) != 'SingleCellExperiment' \n Please provide a SingleCellExperiment object.")
+  }
+
+  # Check if 'binary' is available in the assays slot of the provided SingleCellExperiment object
+  if (!("binary" %in% names(assays(sce)))) {
+    stop("Unable to find 'binary' in assays(sce). Please check that your SCE object includes assays(sce)$binary.")
+  }
+
+  # Check if 'expdata' is available in the assays slot of the provided SingleCellExperiment object
+  if (!("expdata" %in% names(assays(sce)))) {
+    stop("Unable to find 'expdata' in assays(sce). Please check that your SCE object includes assays(sce)$expdata.")
+  }
+
+  # Check if 'Pseudotime' is available in the provided SingleCellExperiment object
+  if (is.null(sce$Pseudotime)) {
+    stop("Unable to find 'Pseudotime'. Please check that your SCE object includes sce$Pseudotime.")
+  }
+
   binarydata <- assays(sce)$binary
   expdata <- assays(sce)$expdata
   binarydata <- binarydata[which(rowData(sce)$passBinary == TRUE), ]
