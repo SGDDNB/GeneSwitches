@@ -20,8 +20,23 @@
 #'
 binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores = 3) {
   
+  # Check if binarize_cutoff is valid -must be greater than 0 and numeric
+  if (!is.numeric(binarize_cutoff) || binarize_cutoff < 0) {
+    stop("The 'binarize_cutoff' must be a numeric value greater than or equal to 0.")
+  }
+
+  # Check if expdata exists
+  if (is.null(assays(sce)$expdata)) {
+    stop("Expression data 'expdata' not found in the SingleCellExperiment object assays.")
+  }
+
   # load in the expression data from the sce object
   expdata <- assays(sce)$expdata
+
+  # check if expdata is a sparse matrix
+  if (!inherits(expdata, "dgCMatrix") && !inherits(expdata, "dgTMatrix")) {
+    stop("Expression data 'assays(sce)$expdata' must be a sparse matrix of class 'dgCMatrix' or 'dgTMatrix'.")
+  }
 
   # calculate the percentage of zeros for each gene
   # assumes expdata is a sparse matrix
@@ -29,14 +44,13 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
   zerop_g <- 1 - (Matrix::rowSums(expdata != 0) / ncol(expdata))
 
   if (fix_cutoff == TRUE) {
-    expdata <- assays(sce)$expdata
     is.na(expdata) <- assays(sce)$expdata == 0
     exp_reduced_binary <- as.matrix((expdata > binarize_cutoff) + 0)
     exp_reduced_binary[is.na(exp_reduced_binary)] = 0
     assays(sce)$binary <- exp_reduced_binary
     oupBinary <- data.frame(geneID = rownames(sce),
                             zerop_gene = zerop_g,
-                            passBinary = TRUE)
+                            passBinary = TRUE) # this may be missleading as no checks were done - MTN 04/02/26
     rowData(sce) <- oupBinary
   } else {
     expdata <- assays(sce)$expdata
