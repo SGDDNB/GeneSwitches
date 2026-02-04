@@ -14,11 +14,12 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.2)
 Imports:
-    SingleCellExperiment (>= 1.6.0), 
+    SingleCellExperiment (>= 1.6.0),
     ggplot2 (>= 3.1.0),
     RColorBrewer,
     plyr,
-    mixtools
-RoxygenNote: 6.1.1.9000
+    mixtools,
+    Matrix
+RoxygenNote: 7.3.3
 Suggests: 
     testthat

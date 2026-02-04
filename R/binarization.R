@@ -15,16 +15,18 @@
 #'
 #' @import parallel
 #' @importFrom mixtools normalmixEM
+#' @importFrom Matrix rowSums
 #' @export
 #'
 binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores = 3) {
-  # calculate zero percentage
-  zerop_g <- c()
+  
+  # load in the expression data from the sce object
   expdata <- assays(sce)$expdata
-  for (i in 1:nrow(expdata)) {
-    zp <- length(which(expdata[i, ] == 0))/ncol(expdata)
-    zerop_g <- c(zerop_g, zp)
-  }
+
+  # calculate the percentage of zeros for each gene
+  # assumes expdata is a sparse matrix
+  # uses Matrix package to calculate the percentage of zeros for each gene
+  zerop_g <- 1 - (Matrix::rowSums(expdata != 0) / ncol(expdata))
 
   if (fix_cutoff == TRUE) {
     expdata <- assays(sce)$expdata
