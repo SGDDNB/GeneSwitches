@@ -19,7 +19,8 @@ Imports:
     RColorBrewer,
     plyr,
     mixtools,
-    Matrix
+    Matrix,
+    pbapply
 RoxygenNote: 7.3.3
 Suggests: 
     testthat

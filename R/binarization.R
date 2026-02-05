@@ -11,14 +11,16 @@
 #' @param fix_cutoff Logical. if use fixed global cutoff for binarization, default FALSE
 #' @param binarize_cutoff fixed global cutoff for binarization, default 0.2
 #' @param ncores number of cores
-#' @return
+#' @param gaussian_weight_cutoff float if the second gaussian has a weight (lambda) less than this cutoff assume the gene is not expressed.
+#' @return 
 #'
 #' @import parallel
+#' @importFrom pbapply pblapply
 #' @importFrom mixtools normalmixEM
-#' @importFrom Matrix rowSums
+#' @importFrom Matrix rowSums colSums t Matrix
 #' @export
 #'
-binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores = 3) {
+binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores = 3, gaussian_weight_cutoff = 0.03) {
   
   # Check if binarize_cutoff is valid -must be greater than 0 and numeric
   if (!is.numeric(binarize_cutoff) || binarize_cutoff < 0) {
@@ -39,6 +41,7 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
   }
 
   # calculate the percentage of zeros for each gene
+  # this variable is not used in the current binarization funciton but used downstream?
   # assumes expdata is a sparse matrix
   # uses Matrix package to calculate the percentage of zeros for each gene
   zerop_g <- 1 - (Matrix::rowSums(expdata != 0) / ncol(expdata))
@@ -51,18 +54,46 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
                             passBinary = TRUE) # this may be missleading as no checks were done - MTN 04/02/26
     rowData(sce) <- oupBinary
   } else {
-    expdata <- assays(sce)$expdata
-    # Add gaussian noise to gene expression matrix
-    # Here we use a sd of 0.1
-    LogCountsadd = expdata + matrix(rnorm(nrow(expdata)*ncol(expdata),
-                                          mean = 0, sd = 0.1),
-                                    nrow(expdata), ncol(expdata))
+    # transpose the expdata to have genes as columns and cells as rows for easier processing in the parallel loop
+    expdata_t <- Matrix::t(expdata)
+
+    # before fitting the mixture models, filter out genes that are expressed in less than 5 cells,
+    # as these are likely to fail the bimodality tests and cause long runtimes due to non-convergence of the normalmixEM algorithm.
+    # these will later be binarized to all 0's, which is likely more accurate than trying to fit a bimodal distribution to a gene that is only expressed in a few cells. 
+    n_cells_expressed <- Matrix::colSums(expdata_t > 0)
+    low5_exp_genes <- names(n_cells_expressed)[n_cells_expressed <= 5]
+    print(paste("Filtering out", length(low5_exp_genes), "genes that are expressed in 5 or fewer cells."))
+    print(paste("These genes will be binarized to 0's."))
+
     # Start fitting mixture models for each gene
+    # If on Windows, use 1 core (safe). If on Linux, use 'ncores' (fast).
+    use_cores <- if(.Platform$OS.type == "windows") 1 else ncores
     oupBinary = do.call(
-      rbind, mclapply(rownames(LogCountsadd), function(iGene){
-        set.seed(42)   # Set seed for consistency
-        tmpMix = normalmixEM(LogCountsadd[iGene, ], k = 2)
-        if (tmpMix$mu[1] < tmpMix$mu[2]) {
+      rbind, pbapply::pblapply(colnames(expdata_t), function(iGene){ # itterate through each gene (cols of expdata_t)
+
+      # START TRYCATCH to avoid errors from the normalmixEM function which can fail to converge for some genes.
+      tryCatch({
+
+      # Extract sparse vector for gene
+      raw_counts <- as.numeric(expdata_t[, iGene])
+
+      # Add gaussian noise to the gene expression to smooth the distribution for better fitting of mixture models.
+      # # Here we use a sd of 0.1
+      noisy_counts <- raw_counts + rnorm(length(raw_counts), mean = 0, sd = 0.1)
+
+      set.seed(42)   # Set seed for consistency
+      # fit mixture model with two components per gene
+      # stricter max itterations and restarts to avoid long runtimes on genes that fail to converge.
+      # similar logic for the higher epsilon value.
+      tmpMix = mixtools::normalmixEM(noisy_counts,
+                                            k = 2,
+                                            maxit = 400,
+                                            maxrestarts = 15,
+                                            epsilon = 1e-6,
+                                            verb = FALSE)
+
+
+      if (tmpMix$mu[1] < tmpMix$mu[2]) {
           tmpOup = data.frame(geneID = iGene,
                               mu1 = tmpMix$mu[1],
                               mu2 = tmpMix$mu[2],
@@ -70,8 +101,9 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
                               sigma2 = tmpMix$sigma[2],
                               lambda1 = tmpMix$lambda[1],
                               lambda2 = tmpMix$lambda[2],
-                              loglik = tmpMix$loglik)
-        } else {
+                              loglik = tmpMix$loglik,
+                              passBinary = TRUE)
+      } else { # correct the order of the two gausians. 
           tmpOup = data.frame(geneID = iGene,
                               mu1 = tmpMix$mu[2],
                               mu2 = tmpMix$mu[1],
@@ -79,40 +111,153 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
                               sigma2 = tmpMix$sigma[1],
                               lambda1 = tmpMix$lambda[2],
                               lambda2 = tmpMix$lambda[1],
-                              loglik = tmpMix$loglik)
-        }
-        return(tmpOup)
-      }, mc.cores = ncores))
+                              loglik = tmpMix$loglik,
+                              passBinary = TRUE)
+      }
+      return(tmpOup)
+      }, error = function(e) {
+              # ERROR HANDLER: If normalmixEM fails, return NA values for this gene
+              message("Error fitting gene: ", iGene)
+              # likley due to non-convergence
+              # Return a row with NA stats and passBinary = FALSE
+              data.frame(geneID = iGene,
+                    mu1 = NA, mu2 = NA,
+                    sigma1 = NA, sigma2 = NA,
+                    lambda1 = NA, lambda2 = NA,
+                    loglik = NA,
+                    passBinary = FALSE)
+          })
+          # END TRYCATCH
 
-    # Check if non-bimodal genes
-    oupBinary$passBinary = TRUE
-    oupBinary[oupBinary$lambda1 < 0.1, ]$passBinary = FALSE
-    oupBinary[oupBinary$lambda2 < 0.1, ]$passBinary = FALSE
-    oupBinary[(oupBinary$mu2 - oupBinary$mu1) < (oupBinary$sigma1 + oupBinary$sigma2), ]$passBinary = FALSE
+    }, cl = use_cores))
+
+    # Check for genes that do not pass the bimodality tests
+
+    # check for overlap between the two gausians,
+    # if the distance between the means is less than the sum of the SDs, mark as non-bimodal
+    # assume these are continuous genes that do not have a clear switch point and are not good candidates for binarization.
+
+    # using which(oupBinary$passBinary) to ensure we don't calculate on NAs
+    pass_idx <- which(oupBinary$passBinary) # Only look at currently passing genes
+    diff_mu <- oupBinary$mu2[pass_idx] - oupBinary$mu1[pass_idx]
+    sum_sigma <- oupBinary$sigma1[pass_idx] + oupBinary$sigma2[pass_idx]
+    fail_sep <- pass_idx[diff_mu < sum_sigma]
+    oupBinary$passBinary[fail_sep] <- FALSE
     # table(oupBinary$passBinary)
+    # print the number of genes that fail the separation test
+    print(paste("Number of genes that fail the separation test:", length(fail_sep)))
+    print(paste("These genes will binarized to NA's."))
 
-    # Solve for intersection for remaining genes
-    oupBinary$root = -1
-    for(iGene in oupBinary[oupBinary$passBinary == TRUE, ]$geneID){
-      tmpMix = oupBinary[oupBinary$geneID == iGene, ]
-      tmpInt = uniroot(function(x, l1, l2, mu1, mu2, sd1, sd2) {
-        dnorm(x, m = mu1, sd = sd1) * l1 -
-          dnorm(x, m = mu2, sd = sd2) * l2},
-        interval = c(tmpMix$mu1,tmpMix$mu2),
-        l1 = tmpMix$lambda1, mu1 = tmpMix$mu1, sd1 = tmpMix$sigma1,
-        l2 = tmpMix$lambda2, mu2 = tmpMix$mu2, sd2 = tmpMix$sigma2)
-      oupBinary[oupBinary$geneID == iGene, ]$root = tmpInt$root
+    # We must use 'which' to avoid crashing on the genes that failed above (they introduce NA values)
+    # Check if one gaussian dominates the other, if one gaussian has less than x% weight mark as non-bimodal
+    # changing this to a variable, default should be more like ~3% based on my testing. - MTN 05/02/26
+    # report the number of genes that fail the gaussian weight cutoff for each gaussian.
+    n_l2_too_small <- length(oupBinary$passBinary[which(oupBinary$passBinary & oupBinary$lambda2 < gaussian_weight_cutoff)])
+    print(paste("Number of genes with lambda2 <", gaussian_weight_cutoff, ":", n_l2_too_small))
+    print(paste("These genes will be binarized to 0's."))
+
+    # filter for l1 being too small removed as it would remove housekeeping genes,
+    # I cant find many/any scenarios where a gene with a small l1 would be a problem for binarization 
+    # Note: the logic above relies on the testing of distance between the means being done first.
+    idx_l2_too_small <- which(oupBinary$passBinary & oupBinary$lambda2 < gaussian_weight_cutoff)
+
+    # These genes should be marked as non-bimodal and set to 0 expression in the binarization
+    # initialize a new column in oupBinary to store the roots,
+    # doing this early alows me to add Inf values for the genes that fail the lambda2 bimodality test.
+    # Inf values mean these genes will be binarized to all 0's
+    oupBinary$root <- NA
+    oupBinary$root[idx_l2_too_small] <- Inf
+
+    # Identify the intersection between the two gausians 
+    # aka the switching point of a switching gene
+
+    # Identify the indicies of the genes which passed the tests for bimodality
+    pass_indices = which(oupBinary$passBinary == TRUE & is.na(oupBinary$root))
+
+    # Itterate through each gene and find the root/intersection
+    for(i in pass_indices){
+        # select the values for the current gene
+        mu1 = oupBinary$mu1[i]
+        mu2 = oupBinary$mu2[i]
+        sd1 = oupBinary$sigma1[i]
+        sd2 = oupBinary$sigma2[i]
+        l1 = oupBinary$lambda1[i]
+        l2 = oupBinary$lambda2[i]
+
+        # Added tryCatch here because in rare cases the intersection is not between the two means, which causes uniroot to fail.
+        tryCatch({
+            # calculate the root/intersection between the two gaussians using uniroot
+            tmpInt = uniroot(function(x) {
+                dnorm(x, mean = mu1, sd = sd1) * l1 -
+                dnorm(x, mean = mu2, sd = sd2) * l2},
+                interval = c(mu1, mu2))
+            # store the root in the dataframe
+            oupBinary$root[i] = tmpInt$root
+            
+        }, error = function(e) {
+            # If uniroot fails, we mark the gene as failed
+            oupBinary$passBinary[i] <<- FALSE # Use double arrow to update outside function
+        })
+        
     }
-    # Binarize expression
-    binLogCounts = expdata[oupBinary$geneID,]
-    binLogCounts = t(scale(t(binLogCounts), scale = FALSE,
-                           center = oupBinary$root))
-    binLogCounts[binLogCounts >= 0] = 1
-    binLogCounts[binLogCounts < 0] = 0
+    ## # Binarize 
+    # match the order of genes in expdata_t
+    # (Note: oupBinary might be in a different order after the parallel loop)
+    rownames(oupBinary) <- oupBinary$geneID
+    roots <- oupBinary[colnames(expdata_t), ]$root
+    # binarize based on the root value for each gene, 
+    # if the expression is greater than the root, it is 1, otherwise 0.
+    binLogCounts <- sweep(expdata_t, 2, roots, ">") + 0
+
+    # add back the genes that were filtered out for being expressed in less than 5 cells, and binarize them to all 0's.
+    # make a sparse matrix of 0's with the same number of columns as low5_exp_genes and the same number of rows as expdata_t.
+    low5_binary <- Matrix::Matrix(0, nrow = nrow(expdata_t), ncol = length(low5_exp_genes),
+                                  dimnames = list(rownames(expdata_t), low5_exp_genes))
+    # bind this with the binarized data
+    binLogCounts <- cbind(binLogCounts, low5_binary)
+
+    # transpose back to have genes as rows and cells as columns
+    binLogCounts <- Matrix::t(binLogCounts)
+
+    # ensure the order of genes in binLogCounts matches the order of genes in sce
+    binLogCounts <- binLogCounts[rownames(sce), ]
+
+    # Store in SingleCellExperiment
     assays(sce)$binary <- binLogCounts
 
-    oupBinary$zerop_gene <- zerop_g
+    # Add metdata 
+    # add the skipped genes back to oupBinary 
+    # with passBinary = TURE (as they will be binarized to all 0's, and should be used for downstream analysis)
+    # set the other parameters asside from geneID and passBinary to NA as they were not tested. 
+    oupSkipped_genes <- data.frame(geneID = low5_exp_genes,
+                                mu1 = NA, mu2 = NA,
+                                sigma1 = NA, sigma2 = NA,
+                                lambda1 = NA, lambda2 = NA,
+                                loglik = NA,
+                                passBinary = TRUE,
+                                root = NA)
+    rownames(oupSkipped_genes) <- oupSkipped_genes$geneID
+    oupBinary <- rbind(oupBinary, oupSkipped_genes)
+    rownames(oupBinary) <- oupBinary$geneID
+
+    # ensure the order of genes in oupBinary matches the order of genes in sce
+    oupBinary <- oupBinary[rownames(sce), ]
+
+    # zerop_g to oupBinary
+    oupBinary$zerop_gene <- zerop_g[oupBinary$geneID]
+    # oupBinary to rowData of sce
     rowData(sce) <- oupBinary
+
+    #print the number of genes that passed the binarization
+    # suprisingly few genes pass the bimodality tests,
+    # best print this to inform the user about the stringency of the tests and potential need to adjust parameters.
+    print(paste("Number of binarized genes:", sum(oupBinary$passBinary)))
+
+    message("Done! Binary assay added to 'assays(sce)$binary'.")
+    #add a warning if binary includes NA's 
+    if (any(is.na(assays(sce)$binary))) {
+      warning("The binary assay contains NA values, which may cause issues in downstream analysis if not removed.")
+    }
   }
   return(sce)
 }

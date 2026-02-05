@@ -4,8 +4,13 @@
 \alias{binarize_exp}
 \title{Binarize gene expression}
 \usage{
-binarize_exp(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2,
-  ncores = 3)
+binarize_exp(
+  sce,
+  fix_cutoff = FALSE,
+  binarize_cutoff = 0.2,
+  ncores = 3,
+  gaussian_weight_cutoff = 0.03
+)
 }
 \arguments{
 \item{sce}{SingleCellExperiment}
@@ -15,9 +20,8 @@ binarize_exp(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2,
 \item{binarize_cutoff}{fixed global cutoff for binarization, default 0.2}
 
 \item{ncores}{number of cores}
-}
-\value{
 
+\item{gaussian_weight_cutoff}{float if the second gaussian has a weight (lambda) less than this cutoff assume the gene is not expressed.}
 }
 \description{
 This function generates on/off binarized data for gene expression
