@@ -65,6 +65,9 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     print(paste("Filtering out", length(low5_exp_genes), "genes that are expressed in 5 or fewer cells."))
     print(paste("These genes will be binarized to 0's."))
 
+    # filter out these genes from expdata_t for the mixture model fitting
+    expdata_t <- expdata_t[, !(colnames(expdata_t) %in% low5_exp_genes)]
+
     # Start fitting mixture models for each gene
     # If on Windows, use 1 core (safe). If on Linux, use 'ncores' (fast).
     use_cores <- if(.Platform$OS.type == "windows") 1 else ncores
