@@ -47,7 +47,7 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
   zerop_g <- 1 - (Matrix::rowSums(expdata != 0) / ncol(expdata))
 
   if (fix_cutoff == TRUE) {
-    exp_reduced_binary <- as.matrix((expdata > binarize_cutoff) + 0)
+    exp_reduced_binary2 <- (expdata > binarize_cutoff) + 0 # Remains sparse 'dgCMatrix'
     assays(sce)$binary <- exp_reduced_binary
     oupBinary <- data.frame(geneID = rownames(sce),
                             zerop_gene = zerop_g,
