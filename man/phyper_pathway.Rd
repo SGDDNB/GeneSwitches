@@ -4,8 +4,13 @@
 \alias{phyper_pathway}
 \title{Find significantly changed pathways and switching timepoint}
 \usage{
-phyper_pathway(N, pathways, toplotgl_ptw, sig_FDR = 0.05,
-  direction = c("up", "down"))
+phyper_pathway(
+  N,
+  pathways,
+  toplotgl_ptw,
+  sig_FDR = 0.05,
+  direction = c("up", "down")
+)
 }
 \arguments{
 \item{N}{expressed genes in pathways}
@@ -19,7 +24,7 @@ phyper_pathway(N, pathways, toplotgl_ptw, sig_FDR = 0.05,
 \item{direction}{switching direction, up or down}
 }
 \value{
-
+A dataframe of significantly changed pathways with switching timepoints
 }
 \description{
 Apply hypergeometric test to determine significantly changed

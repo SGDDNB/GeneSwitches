@@ -10,7 +10,7 @@ plot_monocle_State(monocle2_obj)
 \item{monocle2_obj}{monocle2 output object}
 }
 \value{
-
+A grid object composed of two ggplot objects
 }
 \description{
 This function plots monocle2 trajectory with "State" colors

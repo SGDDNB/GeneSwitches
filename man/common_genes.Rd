@@ -4,8 +4,13 @@
 \alias{common_genes}
 \title{Identify common switching genes between paths}
 \usage{
-common_genes(toplotgl_Rsub1, toplotgl_Rsub2, path1name = "Path1Genes",
-  path2name = "Path2Genes", r2cutoff = 0.05)
+common_genes(
+  toplotgl_Rsub1,
+  toplotgl_Rsub2,
+  path1name = "Path1Genes",
+  path2name = "Path2Genes",
+  r2cutoff = 0.05
+)
 }
 \arguments{
 \item{toplotgl_Rsub1}{switching genes of path1}
@@ -19,7 +24,7 @@ common_genes(toplotgl_Rsub1, toplotgl_Rsub2, path1name = "Path1Genes",
 \item{r2cutoff}{pseudo R^2 cutoff}
 }
 \value{
-
+A dataframe of common switching genes or NULL if directions are inconsistent
 }
 \description{
 This function identifies common switching genes between two paths

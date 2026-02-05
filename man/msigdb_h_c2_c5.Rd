@@ -4,7 +4,9 @@
 \name{msigdb_h_c2_c5}
 \alias{msigdb_h_c2_c5}
 \title{An example of gene sets}
-\format{A list with 6153 pathways, and genes in each pathway}
+\format{
+A list with 6153 pathways, and genes in each pathway
+}
 \source{
 \url{http://software.broadinstitute.org/gsea/msigdb/collections.jsp}
 }

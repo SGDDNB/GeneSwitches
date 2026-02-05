@@ -7,7 +7,7 @@
 get_example_inputData()
 }
 \value{
-
+NULL. Files are downloaded to the working directory
 }
 \description{
 This function checks if example input files are in the current directory and if not download them

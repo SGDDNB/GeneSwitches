@@ -4,7 +4,9 @@
 \name{gs_genelists}
 \alias{gs_genelists}
 \title{An example of gene lists}
-\format{A data frame with 3071 rows and 2 columns. rows are genes, and columns are "genenames" and "genetypes".}
+\format{
+A data frame with 3071 rows and 2 columns. rows are genes, and columns are "genenames" and "genetypes".
+}
 \source{
 \url{http://wlab.ethz.ch/cspa/, http://humantfs.ccbr.utoronto.ca/}
 }

@@ -14,7 +14,7 @@ convert_monocle2(monocle2_obj, states, expdata)
 \item{logexpdata}{log-normal gene expression}
 }
 \value{
-
+A SingleCellExperiment object
 }
 \description{
 This function converts monocle2 output into GeneSwitches object

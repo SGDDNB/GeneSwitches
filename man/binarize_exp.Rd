@@ -23,6 +23,9 @@ binarize_exp(
 
 \item{gaussian_weight_cutoff}{float if the second gaussian has a weight (lambda) less than this cutoff assume the gene is not expressed.}
 }
+\value{
+A SingleCellExperiment object with an added binary assay in `assays(sce)$binary` and updated `rowData(sce)` containing binarization metadata.
+}
 \description{
 This function generates on/off binarized data for gene expression
 }

@@ -4,15 +4,26 @@
 \alias{plot_gene_exp}
 \title{Plot gene expression}
 \usage{
-plot_gene_exp(sce, geneofi, reduction, downsample = FALSE,
-  ds_cutoff = 0.7, zero_ratio = 0.7, ptsize = 0.7, fitting = FALSE)
+plot_gene_exp(
+  sce,
+  gene,
+  reduction,
+  fitting = FALSE,
+  bin_width = 0.1,
+  downsample = FALSE,
+  ds_cutoff = 0.7,
+  zero_ratio = 0.7,
+  ptsize = 0.7
+)
 }
 \arguments{
 \item{sce}{SingleCellExperiment}
 
-\item{geneofi}{one gene of interest}
+\item{gene}{one gene of interest}
 
 \item{reduction}{dimensional reduction method}
+
+\item{fitting}{if plot logistic regression fitting}
 
 \item{downsample}{if do random downsampling of zeros}
 
@@ -21,11 +32,9 @@ plot_gene_exp(sce, geneofi, reduction, downsample = FALSE,
 \item{zero_ratio}{downsampling zeros to this proportion}
 
 \item{ptsize}{point size}
-
-\item{fitting}{if plot logistic regression fitting}
 }
 \value{
-
+A grid object or a ggplot object showing gene expression
 }
 \description{
 This function plot gene expression on two-dimensional space

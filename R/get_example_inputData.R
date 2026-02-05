@@ -2,7 +2,7 @@
 #'
 #' @description This function checks if example input files are in the current directory and if not download them
 #'
-#' @return
+#' @return NULL. Files are downloaded to the working directory
 #'
 #' @export
 #'

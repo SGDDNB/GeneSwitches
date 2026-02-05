@@ -4,8 +4,12 @@
 \alias{find_switch_pathway}
 \title{Find significantly changed pathways and switching timepoint}
 \usage{
-find_switch_pathway(scerowdata, pathways = msigdb_h_c2_c5, toplotgl_sig,
-  sig_FDR = 0.05)
+find_switch_pathway(
+  scerowdata,
+  pathways = msigdb_h_c2_c5,
+  toplotgl_sig,
+  sig_FDR = 0.05
+)
 }
 \arguments{
 \item{pathways}{a list of pathways with genes}
@@ -17,7 +21,7 @@ find_switch_pathway(scerowdata, pathways = msigdb_h_c2_c5, toplotgl_sig,
 \item{toplotgl_ptw}{swiching genes to plot}
 }
 \value{
-
+A dataframe of significantly changed pathways ordered by FDR
 }
 \description{
 This function finds significantly changed pathways and determine

@@ -12,7 +12,7 @@
 #' @param binarize_cutoff fixed global cutoff for binarization, default 0.2
 #' @param ncores number of cores
 #' @param gaussian_weight_cutoff float if the second gaussian has a weight (lambda) less than this cutoff assume the gene is not expressed.
-#' @return 
+#' @return A SingleCellExperiment object with an added binary assay in `assays(sce)$binary` and updated `rowData(sce)` containing binarization metadata.
 #'
 #' @import parallel
 #' @importFrom pbapply pblapply

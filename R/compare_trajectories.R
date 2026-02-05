@@ -7,7 +7,7 @@
 #' @param path1name name of path1 given by user
 #' @param path2name name of path2 given by user
 #' @param r2cutoff pseudo R^2 cutoff
-#' @return
+#' @return A dataframe of distinct switching genes
 #'
 #' @export
 #'
@@ -50,7 +50,7 @@ distinct_genes <- function(toplotgl_Rsub1, toplotgl_Rsub2, path1name = "Path1Gen
 #' @param path1name name of path1 given by user
 #' @param path2name name of path2 given by user
 #' @param r2cutoff pseudo R^2 cutoff
-#' @return
+#' @return A dataframe of common switching genes or NULL if directions are inconsistent
 #'
 #' @export
 #'
@@ -88,7 +88,7 @@ common_genes <- function(toplotgl_Rsub1, toplotgl_Rsub2, path1name = "Path1Genes
 #'
 #' @param ggData data frame for common genes
 #' @param timedata timedata to show on plot
-#' @return
+#' @return A ggplot object representing the common genes plot
 #'
 #' @export
 #'

@@ -12,7 +12,7 @@ common_genes_plot(ggData, timedata)
 \item{timedata}{timedata to show on plot}
 }
 \value{
-
+A ggplot object representing the common genes plot
 }
 \description{
 This function plots common switching genes between two paths

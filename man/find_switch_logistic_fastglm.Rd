@@ -4,8 +4,14 @@
 \alias{find_switch_logistic_fastglm}
 \title{Fit fast logistic regression and find switching timepoint}
 \usage{
-find_switch_logistic_fastglm(sce, downsample = FALSE, ds_cutoff = 0.7,
-  zero_ratio = 0.7, sig_FDR = 0.05, show_warnings = TRUE)
+find_switch_logistic_fastglm(
+  sce,
+  downsample = FALSE,
+  ds_cutoff = 0.7,
+  zero_ratio = 0.7,
+  sig_FDR = 0.05,
+  show_warnings = TRUE
+)
 }
 \arguments{
 \item{sce}{SingleCellExperiment}
@@ -19,7 +25,7 @@ find_switch_logistic_fastglm(sce, downsample = FALSE, ds_cutoff = 0.7,
 \item{sig_FDR}{FDR cut off for significant genes}
 }
 \value{
-
+A SingleCellExperiment object with the regression results added to rowData
 }
 \description{
 This function fits fast logistic regression and find switching timepoint for each gene

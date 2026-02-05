@@ -4,7 +4,7 @@
 #'
 #' @param glmdata binary data of one gene
 #' @param ratio_ds downsampling zeros to this proportion
-#' @return
+#' @return A dataframe containing the downsampled data
 #'
 downsample_zeros <- function(glmdata, ratio_ds = 0.7) {
   p = as.numeric(ratio_ds)
@@ -25,7 +25,7 @@ downsample_zeros <- function(glmdata, ratio_ds = 0.7) {
 #' @param ds_cutoff only do downsampling if zero percentage is over this cutoff
 #' @param zero_ratio downsampling zeros to this proportion
 #' @param sig_FDR FDR cut off for significant genes
-#' @return
+#' @return A SingleCellExperiment object with the regression results added to rowData
 #'
 #' @import fastglm
 #' @export

@@ -11,7 +11,7 @@
 #' @param r2cutoff pseudo R^2 cutoff
 #' @param direction switching direction, up or down
 #' @param topnum number of top genes ordered by pseudo R^2 value
-#' @return
+#' @return A dataframe of filtered switching genes
 #'
 #' @import plyr
 #' @export
@@ -73,7 +73,7 @@ filter_switchgenes <- function(sce, allgenes = FALSE, pathway_name = NULL, genel
 #' @param iffulltml if plot the full timeline
 #' @param txtsize text size for gene names
 #' @param color_by the cell attribute (e.g. the column of tml) to map to each cell's color
-#' @return
+#' @return A ggplot object representing the timeline plot
 #'
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel

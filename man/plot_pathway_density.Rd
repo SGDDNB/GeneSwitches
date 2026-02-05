@@ -4,8 +4,12 @@
 \alias{plot_pathway_density}
 \title{Pathways ridge plot}
 \usage{
-plot_pathway_density(switch_pw_re, toplotgl_sig, pw_direction = c("up",
-  "down"), orderbytime = TRUE)
+plot_pathway_density(
+  switch_pw_re,
+  toplotgl_sig,
+  pw_direction = c("up", "down"),
+  orderbytime = TRUE
+)
 }
 \arguments{
 \item{switch_pw_re}{significant pathways to plot}
@@ -18,7 +22,7 @@ order the pathways by FDR if FALSE}
 \item{direction}{switching direction of the pathway, up or down}
 }
 \value{
-
+A ggplot object representing the pathway ridge plot
 }
 \description{
 This function generates pathways ridge plots

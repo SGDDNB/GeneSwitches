@@ -14,7 +14,7 @@ merge_pathways(switch_pw, pathways, ratio)
 \item{ratio}{cutoff ratio for merging redundant pathways}
 }
 \value{
-
+A dataframe of merged pathways
 }
 \description{
 Merge significant pathways that are with same genes over certain ratio

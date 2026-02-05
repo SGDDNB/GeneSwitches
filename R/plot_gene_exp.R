@@ -10,7 +10,7 @@
 #' @param zero_ratio downsampling zeros to this proportion
 #' @param ptsize point size
 #' @param fitting if plot logistic regression fitting
-#' @return
+#' @return A grid object or a ggplot object showing gene expression
 #'
 #' @import ggplot2
 #' @importFrom RColorBrewer brewer.pal

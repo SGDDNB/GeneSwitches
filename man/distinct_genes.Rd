@@ -4,9 +4,17 @@
 \alias{distinct_genes}
 \title{Identify distinct switching genes for each path}
 \usage{
-distinct_genes(toplotgl_Rsub1, toplotgl_Rsub2, path1name = "Path1Genes",
-  path2name = "Path2Genes", r2cutoff = 0.05, scale_timeline = FALSE,
-  path1time = NULL, path2time = NULL, bin = 100)
+distinct_genes(
+  toplotgl_Rsub1,
+  toplotgl_Rsub2,
+  path1name = "Path1Genes",
+  path2name = "Path2Genes",
+  r2cutoff = 0.05,
+  scale_timeline = FALSE,
+  path1time = NULL,
+  path2time = NULL,
+  bin = 100
+)
 }
 \arguments{
 \item{toplotgl_Rsub1}{switching genes of path1}
@@ -20,7 +28,7 @@ distinct_genes(toplotgl_Rsub1, toplotgl_Rsub2, path1name = "Path1Genes",
 \item{r2cutoff}{pseudo R^2 cutoff}
 }
 \value{
-
+A dataframe of distinct switching genes
 }
 \description{
 This function identifies distinct switching genes for each path

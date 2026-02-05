@@ -14,7 +14,7 @@ reduce_pathways(switch_pw, pathways, redundant_pw_rate = 0.8)
 \item{redundant_pw_rate}{cutoff ratio for merging redundant pathways}
 }
 \value{
-
+A dataframe of reduced pathways
 }
 \description{
 Reduce significant pathways that are with same genes over certain ratio,

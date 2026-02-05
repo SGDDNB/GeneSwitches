@@ -4,10 +4,17 @@
 \alias{filter_switchgenes}
 \title{Extract switching gene list of interesting}
 \usage{
-filter_switchgenes(sce, allgenes = FALSE, pathway_name = NULL,
-  genelists = GeneSwitches:::genelists,
-  genetype = c("Surface proteins", "TFs"), zero_pct = 0.9,
-  r2cutoff = 0.03, direction = c("up", "down"), topnum = 1e+05)
+filter_switchgenes(
+  sce,
+  allgenes = FALSE,
+  pathway_name = NULL,
+  genelists = GeneSwitches:::gs_genelists,
+  genetype = c("Surface proteins", "TFs"),
+  zero_pct = 0.9,
+  r2cutoff = 0.03,
+  direction = c("up", "down"),
+  topnum = 1e+05
+)
 }
 \arguments{
 \item{sce}{switching genes}
@@ -29,7 +36,7 @@ filter_switchgenes(sce, allgenes = FALSE, pathway_name = NULL,
 \item{topnum}{number of top genes ordered by pseudo R^2 value}
 }
 \value{
-
+A dataframe of filtered switching genes
 }
 \description{
 This function extract a list of significant switching genes

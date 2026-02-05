@@ -6,7 +6,7 @@
 #' @import Biobase
 #' @import ggplot2
 #' @importFrom gridExtra grid.arrange
-#' @return
+#' @return A grid object composed of two ggplot objects
 #'
 #' @export
 #'
@@ -51,7 +51,7 @@ plot_monocle_State <- function(monocle2_obj){
 #' @param states a vector of states (path) that are interested in
 #' @param logexpdata log-normal gene expression
 #' @import Biobase
-#' @return
+#' @return A SingleCellExperiment object
 #'
 #' @export
 #'
@@ -81,7 +81,7 @@ convert_monocle2 <- function(monocle2_obj, states, expdata){
 #' @param sce_slingshot slingshot SingleCellExperiment output object
 #' @param pseudotime_idx name of desired pseudotime path to apply GeneSwitches
 #' @param assayname expression assay to use
-#' @return
+#' @return A SingleCellExperiment object
 #'
 #' @export
 #'
@@ -115,7 +115,7 @@ convert_slingshot <- function(sce_slingshot, pseudotime_idx, assayname = "expdat
 #' @param assayname expression assay to use
 #' @param minexp minimun expression to filer genes
 #' @param mincells minimun cells with expression
-#' @return
+#' @return A subsetted SingleCellExperiment object
 #'
 #' @export
 #'

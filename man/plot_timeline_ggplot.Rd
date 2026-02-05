@@ -4,8 +4,13 @@
 \alias{plot_timeline_ggplot}
 \title{Plot switching genes}
 \usage{
-plot_timeline_ggplot(tml, timedata, iffulltml = TRUE, txtsize = 3.5,
-  color_by = "feature_type")
+plot_timeline_ggplot(
+  tml,
+  timedata,
+  iffulltml = TRUE,
+  txtsize = 3.5,
+  color_by = "feature_type"
+)
 }
 \arguments{
 \item{tml}{switching genes}
@@ -19,7 +24,7 @@ plot_timeline_ggplot(tml, timedata, iffulltml = TRUE, txtsize = 3.5,
 \item{color_by}{the cell attribute (e.g. the column of tml) to map to each cell's color}
 }
 \value{
-
+A ggplot object representing the timeline plot
 }
 \description{
 This function plots switching genes on the pseudo-timeline

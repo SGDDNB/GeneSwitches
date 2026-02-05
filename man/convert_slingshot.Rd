@@ -14,7 +14,7 @@ convert_slingshot(sce_slingshot, pseudotime_idx, assayname = "expdata")
 \item{assayname}{expression assay to use}
 }
 \value{
-
+A SingleCellExperiment object
 }
 \description{
 This function converts slingshot output into GeneSwitches object

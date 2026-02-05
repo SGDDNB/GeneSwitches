@@ -8,7 +8,7 @@
 #' @param toplotgl_ptw swiching genes to plot
 #' @param sig_FDR FDR cut off for significant pathways
 #' @param direction switching direction, up or down
-#' @return
+#' @return A dataframe of significantly changed pathways with switching timepoints
 #'
 phyper_pathway <- function(N, pathways, toplotgl_ptw, sig_FDR = 0.05, direction = c("up", "down")){
   pv <- c()
@@ -43,7 +43,7 @@ phyper_pathway <- function(N, pathways, toplotgl_ptw, sig_FDR = 0.05, direction 
 #' @param switch_pw a data frame with significantly changed pathways
 #' @param pathways a list of pathways with genes
 #' @param ratio cutoff ratio for merging redundant pathways
-#' @return
+#' @return A dataframe of merged pathways
 #'
 merge_pathways <- function(switch_pw, pathways, ratio){
   switch_pw <- switch_pw[order(switch_pw$FDR),]
@@ -73,7 +73,7 @@ merge_pathways <- function(switch_pw, pathways, ratio){
 #' @param pathways a list of pathways with genes
 #' @param redundant_pw_rate cutoff ratio for merging redundant pathways
 #' @export
-#' @return
+#' @return A dataframe of reduced pathways
 #'
 reduce_pathways <- function(switch_pw, pathways, redundant_pw_rate = 0.8){
   switch_up <- switch_pw[switch_pw$direction == "up",]
@@ -100,7 +100,7 @@ reduce_pathways <- function(switch_pw, pathways, redundant_pw_rate = 0.8){
 #' @param pathways a list of pathways with genes
 #' @param toplotgl_ptw swiching genes to plot
 #' @param sig_FDR FDR cut off for significant pathways
-#' @return
+#' @return A dataframe of significantly changed pathways ordered by FDR
 #'
 #' @export
 #'
@@ -140,7 +140,7 @@ find_switch_pathway <- function(scerowdata, pathways = msigdb_h_c2_c5, toplotgl_
 #' @param direction switching direction of the pathway, up or down
 #' @param orderbytime order the pathways by switching time (mean time of switching genes) if TRUE,
 #'                    order the pathways by FDR if FALSE
-#' @return
+#' @return A ggplot object representing the pathway ridge plot
 #'
 #' @importFrom ggridges geom_density_ridges
 #' @export

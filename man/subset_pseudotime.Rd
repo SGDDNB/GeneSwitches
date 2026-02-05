@@ -4,8 +4,14 @@
 \alias{subset_pseudotime}
 \title{Subset GeneSwitches object based on the range of pseudotime}
 \usage{
-subset_pseudotime(sce, min_time, max_time, assayname = "expdata",
-  minexp = 0, mincells = 10)
+subset_pseudotime(
+  sce,
+  min_time,
+  max_time,
+  assayname = "expdata",
+  minexp = 0,
+  mincells = 10
+)
 }
 \arguments{
 \item{sce}{GeneSwitches object which is a SingleCellExperiment object}
@@ -21,7 +27,7 @@ subset_pseudotime(sce, min_time, max_time, assayname = "expdata",
 \item{mincells}{minimun cells with expression}
 }
 \value{
-
+A subsetted SingleCellExperiment object
 }
 \description{
 This function subsets GeneSwitches object based on the range of pseudotime

@@ -12,7 +12,7 @@ downsample_zeros(glmdata, ratio_ds = 0.7)
 \item{ratio_ds}{downsampling zeros to this proportion}
 }
 \value{
-
+A dataframe containing the downsampled data
 }
 \description{
 This function does randomly downsampling of cells with zero expression for one gene
