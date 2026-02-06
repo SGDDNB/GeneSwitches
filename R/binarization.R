@@ -139,7 +139,7 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
 
     # report number of genes which normalmixEM failed to fit a model 
     if (sum(oupBinary$passBinary == FALSE) > 0) {
-        warning(paste(sum(oupBinary$passBinary == FALSE), "genes failed to fit a mixture model and will removed."))
+        message(paste(sum(oupBinary$passBinary == FALSE), "genes failed to fit a mixture model and will removed."))
     }
 
 
@@ -160,7 +160,7 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     # table(oupBinary$passBinary)
     # print the number of genes that fail the separation test
     if (length(fail_sep) > 0) {
-        warning(paste(length(fail_sep), "genes failed the separation test and will be removed."))
+        message(paste(length(fail_sep), "genes failed the separation test and will be removed."))
     }
 
     # We must use 'which' to avoid crashing on the genes that failed above (they introduce NA values)
@@ -230,12 +230,12 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     # remove the genes that failed the bimodality tests and have NA roots, as these will cause errors in the binarization step.
     # these genes will be removed.
     genes_to_remove <- oupBinary$geneID[is.na(oupBinary$root) & oupBinary$passBinary == FALSE]
-    if (length(genes_to_remove) > 0) {
-        message(paste("A total of:",length(genes_to_remove), "genes will be removed from sce."))
+      if (length(genes_to_remove) > 0) {
+        warning(paste("A total of:", length(genes_to_remove), "genes will be removed from sce."))
         expdata_t <- expdata_t[, !(colnames(expdata_t) %in% genes_to_remove)]
         oupBinary <- oupBinary[!(oupBinary$geneID %in% genes_to_remove), ]
         sce <- sce[!(rownames(sce) %in% genes_to_remove), ]
-    }
+      }
 
     # binarize based on the root value for each gene, 
     # if the expression is greater than the root, it is 1, otherwise 0.
@@ -279,10 +279,10 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
 
     # print the number of genes that passed the binarization
     # best print this to inform the user about the stringency of the tests and potential need to adjust parameters.
-    print(paste("Number of binarized genes:", sum(oupBinary$passBinary) + length(low5_exp_genes)))
+    message(paste("Number of binarized genes:", sum(oupBinary$passBinary) + length(low5_exp_genes)))
 
     message("Done! Binary assay added to 'assays(sce)$binary'.")
-    #add a warning if binary includes NA's 
+    #add a warning if binary includes NA's # They should not include NA's as we have removed the genes that fail the bimodality tests, but this is just a safety check.
     if (any(is.na(assays(sce)$binary))) {
         warning("The binary assay contains NA values, which may cause issues in downstream analysis if not removed.")
     }
