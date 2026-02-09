@@ -69,7 +69,7 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     expdata_t <- expdata_t[, !(colnames(expdata_t) %in% low5_exp_genes)]
 
     # --- MIXTURE MODEL FITTING ---
-
+    message("Fitting mixture models for each gene... (use multiple cores for faster processing!)")
     # Start fitting mixture models for each gene
     # If on Windows, use 1 core (safe). If on Linux, use 'ncores' (fast).
     use_cores <- if(.Platform$OS.type == "windows") 1 else ncores
