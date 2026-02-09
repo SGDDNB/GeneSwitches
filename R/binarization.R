@@ -1,4 +1,3 @@
-
 .onAttach <- function(libname, pkgname) {
   packageStartupMessage("Welcome to GeneSwitches!")
 }
@@ -180,9 +179,10 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     # These genes should be marked as non-bimodal and set to 0 expression in the binarization
     # initialize a new column in oupBinary to store the roots,
     # doing this early alows me to add Inf values for the genes that fail the lambda2 bimodality test.
-    # Inf values mean these genes will be binarized to all 0's
     oupBinary$root <- NA
-    oupBinary$root[idx_l2_too_small] <- Inf
+    # Inf values mean these genes will be binarized to all 0's
+    # only do this for genes where oupBinary$passBinary is TRUE to avoid adding Inf values to genes that already failed the separation test and have passBinary = FALSE.
+    oupBinary$root[idx_l2_too_small & oupBinary$passBinary] <- Inf
 
     # --- CALCULATE Roots/intersections ---
 
