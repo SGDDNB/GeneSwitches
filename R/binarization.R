@@ -165,16 +165,16 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     # We must use 'which' to avoid crashing on the genes that failed above (they introduce NA values)
     # Check if one gaussian dominates the other, if one gaussian has less than x% weight mark as non-bimodal
     # changing this to a variable, default should be more like ~3% based on my testing. - MTN 05/02/26
+
     # report the number of genes that fail the gaussian weight cutoff for each gaussian.
-    n_l2_too_small <- length(oupBinary$passBinary[which(oupBinary$passBinary & oupBinary$lambda2 < gaussian_weight_cutoff)])
-    if (n_l2_too_small > 0) {
-        message(paste(n_l2_too_small, "genes have lambda2 <", gaussian_weight_cutoff, "and will be binarized to 0's."))
+    idx_l2_too_small <- which(oupBinary$passBinary & oupBinary$lambda2 < gaussian_weight_cutoff)
+    if (length(idx_l2_too_small) > 0) {
+        message(paste(length(idx_l2_too_small), "genes have lambda2 <", gaussian_weight_cutoff, "and will be binarized to 0's."))
     }
+    # Note: the logic above relies on the testing of distance between the means being done first.
 
     # filter for l1 being too small removed as it would remove housekeeping genes,
-    # I cant find many/any scenarios where a gene with a small l1 would be a problem for binarization 
-    # Note: the logic above relies on the testing of distance between the means being done first.
-    idx_l2_too_small <- which(oupBinary$passBinary & oupBinary$lambda2 < gaussian_weight_cutoff)
+    # I cant find many/any scenarios where a gene with a small l1 would be a problem for binarization
 
     # These genes should be marked as non-bimodal and set to 0 expression in the binarization
     # initialize a new column in oupBinary to store the roots,
@@ -182,7 +182,8 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     oupBinary$root <- NA
     # Inf values mean these genes will be binarized to all 0's
     # only do this for genes where oupBinary$passBinary is TRUE to avoid adding Inf values to genes that already failed the separation test and have passBinary = FALSE.
-    oupBinary$root[idx_l2_too_small & oupBinary$passBinary] <- Inf
+    # Use the integer indices (idx_l2_too_small) directly; they already filtered for passBinary == TRUE
+    oupBinary$root[idx_l2_too_small] <- Inf
 
     # --- CALCULATE Roots/intersections ---
 
@@ -279,7 +280,7 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
 
     # print the number of genes that passed the binarization
     # best print this to inform the user about the stringency of the tests and potential need to adjust parameters.
-    message(paste("Number of binarized genes:", sum(oupBinary$passBinary) + length(low5_exp_genes)))
+    message(paste("Number of binarized genes:", sum(oupBinary$passBinary)))
 
     message("Done! Binary assay added to 'assays(sce)$binary'.")
     #add a warning if binary includes NA's # They should not include NA's as we have removed the genes that fail the bimodality tests, but this is just a safety check.
