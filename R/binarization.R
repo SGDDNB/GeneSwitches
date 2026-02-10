@@ -221,12 +221,12 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     }
 
 
-    # --- BINARIZATION ---
+        # --- BINARIZATION ---
 
     # match the order of genes in expdata_t
-    # (Note: oupBinary might be in a different order after the parallel loop)
+    # (because oupBinary might be in a different order after the parallel loop)
     rownames(oupBinary) <- oupBinary$geneID
-    oupBinary <- oupBinary[match(colnames(expdata_t), oupBinary$geneID), ]
+    oupBinary <- oupBinary[colnames(expdata_t), ]
 
     # remove the genes that failed the bimodality tests and have NA roots, as these will cause errors in the binarization step.
     # these genes will be removed.
@@ -238,33 +238,66 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
         sce <- sce[!(rownames(sce) %in% genes_to_remove), ]
       }
 
+
+    # Perform Sparse Binarization efficiently
     # binarize based on the root value for each gene, 
     # if the expression is greater than the root, it is 1, otherwise 0.
-    binLogCounts <- sweep(expdata_t, 2, oupBinary$root, ">") + 0
+
+    # Transpose back to Genes x Cells immediately.
+    # We do this because we need to compare each row (gene) to a specific threshold.
+    mat_genes <- Matrix::t(expdata_t)
+
+    # Force to dgCMatrix to ensure @i and @x slots are accessible
+    # (t() can sometimes return dgTMatrix or other types)
+    if (!inherits(mat_genes, "dgCMatrix")) {
+        mat_genes <- as(mat_genes, "dgCMatrix") 
+    }
+    
+    # Extract thresholds aligned with the rows of mat_genes
+    gene_roots <- oupBinary$root
+    
+    # We leverage the internal structure of dgCMatrix:
+    # @x contains non-zero values, @i contains their 0-based row indices.
+    # We only need to update the non-zero values. 
+    # (Assumption: gene_roots >= 0. Therefore 0 > root is always FALSE, so zeros stay zeros).
+    # aka they are already binarized to 0's, so we only need to update the non-zero values to 1's or 0's based on the root comparison.
+    
+    # Get 1-based row indices for every non-zero element
+    nonZero_row_indices <- mat_genes@i + 1
+    # Compare each non-zero value to its specific gene threshold
+    # If val > root -> 1. If val <= root -> 0. 
+    # Update the matrix values
+    mat_genes@x  <- (mat_genes@x > gene_roots[nonZero_row_indices]) + 0
+
+    # Drop explicit zeros (values that were <= root became 0) to keep matrix sparse
+    binLogCounts <- Matrix::drop0(mat_genes)
 
     # add back the genes that were filtered out for being expressed in less than 5 cells, and binarize them to all 0's.
-    # make a sparse matrix of 0's with the same number of columns as low5_exp_genes and the same number of rows as expdata_t.
-    low5_binary <- Matrix::Matrix(0, nrow = nrow(expdata_t), ncol = length(low5_exp_genes),
-                                    dimnames = list(rownames(expdata_t), low5_exp_genes))
-    # aslo add them to the metadata dataframe oupBinary
-    # add the skipped genes back to oupBinary 
-    # with passBinary = TURE (as they will be binarized to all 0's, and should be used for downstream analysis)
-    # set the other parameters asside from geneID and passBinary to NA as they were not tested. 
-    oupSkipped_genes <- data.frame(geneID = low5_exp_genes,
-                                mu1 = NA, mu2 = NA,
-                                sigma1 = NA, sigma2 = NA,
-                                lambda1 = NA, lambda2 = NA,
-                                loglik = NA,
-                                passBinary = TRUE,
-                                root = NA)
-    rownames(oupSkipped_genes) <- oupSkipped_genes$geneID
-    oupBinary <- rbind(oupBinary, oupSkipped_genes)
-    rownames(oupBinary) <- oupBinary$geneID
+    if (length(low5_exp_genes) > 0) {
+        # Create sparse matrix of 0s:
+        # with the same number of columns as low5_exp_genes and the same number of rows as expdata_t.
+        low5_binary <- Matrix::Matrix(0, nrow = length(low5_exp_genes), ncol = ncol(binLogCounts),
+                                      dimnames = list(low5_exp_genes, colnames(binLogCounts)))
+        
+        # also add them to the metadata dataframe oupBinary
+        # add the skipped genes back to oupBinary 
+        # with passBinary = TURE (as they will be binarized to all 0's, and should be used for downstream analysis)
+        # set the other parameters asside from geneID and passBinary to NA as they were not tested. 
+        oupSkipped_genes <- data.frame(geneID = low5_exp_genes,
+                                       mu1 = NA, mu2 = NA,
+                                       sigma1 = NA, sigma2 = NA,
+                                       lambda1 = NA, lambda2 = NA,
+                                       loglik = NA,
+                                       passBinary = TRUE,
+                                       root = NA)
+        rownames(oupSkipped_genes) <- oupSkipped_genes$geneID
+        oupBinary <- rbind(oupBinary, oupSkipped_genes)
+        
+        # Bind this with the binarized matrix
+        # (Genes as Rows as we have transposed back)
+        binLogCounts <- rbind(binLogCounts, low5_binary)
+    }
 
-    # bind this with the binarized data
-    binLogCounts <- cbind(binLogCounts, low5_binary)
-    # transpose back to have genes as rows and cells as columns
-    binLogCounts <- Matrix::t(binLogCounts)
     # ensure the order of genes in binLogCounts matches the order of genes in sce
     binLogCounts <- binLogCounts[rownames(sce), ]
     # Store in SingleCellExperiment
