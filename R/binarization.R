@@ -84,9 +84,10 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
 
         # Add gaussian noise to the gene expression to smooth the distribution for better fitting of mixture models.
         # # Here we use a sd of 0.1
+        set.seed(42)   # Set seed for consistency
         noisy_counts <- raw_counts + rnorm(length(raw_counts), mean = 0, sd = 0.1)
 
-        set.seed(42)   # Set seed for consistency
+        
         # fit mixture model with two components per gene
         # stricter max itterations and restarts to avoid long runtimes on genes that fail to converge.
         # similar logic for the higher epsilon value.
