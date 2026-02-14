@@ -34,9 +34,10 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
   # load in the expression data from the sce object
   expdata <- assays(sce)$expdata
 
-  # check if expdata is a sparse matrix
-  if (!inherits(expdata, "dgCMatrix") && !inherits(expdata, "dgTMatrix")) {
-    stop("Expression data 'assays(sce)$expdata' must be a sparse matrix of class 'dgCMatrix' or 'dgTMatrix'.")
+  # ensure expdata is a sparse matrix for downstream efficiency
+  if (!inherits(expdata, "dgCMatrix")) {
+    message("assays(sce)$expdata is not sparse.\nCoercing expression data to dgCMatrix for efficiency...")
+    expdata <- as(expdata, "dgCMatrix")
   }
 
   # calculate the percentage of zeros for each gene
