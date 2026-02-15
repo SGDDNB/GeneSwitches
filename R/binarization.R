@@ -36,7 +36,7 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
 
   # ensure expdata is a sparse matrix for downstream efficiency
   if (!inherits(expdata, "dgCMatrix")) {
-    message("assays(sce)$expdata is not sparse.\nCoercing expression data to dgCMatrix for efficiency...")
+    message("assays(sce)$expdata is not sparse (dgCMatrix).\nCoercing expression data to dgCMatrix for efficiency...")
     expdata <- as(expdata, "dgCMatrix")
   }
 
