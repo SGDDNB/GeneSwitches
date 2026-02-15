@@ -1,5 +1,3 @@
-
-
 #' @title Fit fast logistic regression and find switching timepoint
 #'
 #' @description This function fits fast logistic regression and find switching timepoint for each gene
@@ -28,9 +26,18 @@ find_switch_logistic_fastglm <- function(sce,
   binarydata <- assays(sce)$binary
   expdata <- assays(sce)$expdata 
 
-  # CHECK: Ensure they are sparse before proceeding. 
-  if (!inherits(binarydata, "sparseMatrix") || !inherits(expdata, "sparseMatrix")) {
-    warning("Input data is not a sparse matrix (dgCMatrix). Please convert 'assays(sce)' to sparse format first.")
+  # this function assumes the matrices to be sparse
+  # ensure expdata is a sparse matrix for downstream efficiency
+  if (!inherits(expdata, "dgCMatrix")) {
+    message("assays(sce)$expdata is not sparse (dgCMatrix).", 
+            "Coercing expression data to dgCMatrix for efficiency...")
+    expdata <- as(expdata, "dgCMatrix")
+  }
+  # ensure binarydata is a sparse matrix for downstream efficiency
+  if (!inherits(binarydata, "dgCMatrix")) {
+    message("assays(sce)$binary is not sparse (dgCMatrix).",
+            "Coercing expression data to dgCMatrix for efficiency...")
+    binarydata <- as(binarydata, "dgCMatrix")
   }
 
   # --- FILTERING ASSAY DATA ---
@@ -94,6 +101,11 @@ find_switch_logistic_fastglm <- function(sce,
   # 1. Expressed in < 10 cells (Too few 1s)
   # 2. Expressed in > (Total - 10) cells (Too few 0s)
   skip_gene <- (gene_counts < min_cells_required) | (gene_counts > (n_cells - min_cells_required))
+  # report number of skipped genes
+  message(sum(skip_gene), " genes will be skipped due to insufficient expression.",
+          "If a gene is expressed in fewer than 10 cells regression results may be unreliable")
+
+  message("Fitting logistic regression models...")
 
   for (i in 1:ncol(binary_t)) {
     # Skip genes that are too sparse for reliable regression
@@ -206,6 +218,7 @@ find_switch_logistic_fastglm <- function(sce,
     }
   }
 
+  message("Finished fitting models. Processing results...")
   
 # --- POST-PROCESSING ---
 # Create Dataframe of Results
