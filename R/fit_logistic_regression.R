@@ -40,17 +40,6 @@ find_switch_logistic_fastglm <- function(sce,
     binarydata <- as(binarydata, "dgCMatrix")
   }
 
-  # --- FILTERING ASSAY DATA ---
-  ## # shouldnt be required with the new implementation of binarize_exp, but keep this just in case.
-  # As we dont expect any fails this could just be a check to throw an error
-  # then we can not worry about NAs in the downstream code.
-
-  # check if there are any genes that failed the binarization test (passBinary == FALSE)
-  if (any(rowData(sce)$passBinary == FALSE)) {
-      stop("Some genes failed the binarization test (passBinary == FALSE). \n Please remove these genes before continuing.")
-  }
-
-
   # --- TRANSPOSE ---
   # looping through a sparse matrix's columns is faster than looping through rows.
   binary_t <- Matrix::t(binarydata)
@@ -102,8 +91,8 @@ find_switch_logistic_fastglm <- function(sce,
   # 2. Expressed in > (Total - 10) cells (Too few 0s)
   skip_gene <- (gene_counts < min_cells_required) | (gene_counts > (n_cells - min_cells_required))
   # report number of skipped genes
-  message(sum(skip_gene), " genes will be skipped due to insufficient expression.",
-          "If a gene is expressed in fewer than 10 cells regression results may be unreliable")
+  message(sum(skip_gene), " genes will be skipped due to insufficient expression.")
+          # "If a gene is expressed in fewer than 10 cells regression results may be unreliable"
 
   message("Fitting logistic regression models...")
 
