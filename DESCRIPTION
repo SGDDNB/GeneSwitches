@@ -1,7 +1,7 @@
 Package: GeneSwitches
 Type: Package
 Title: Discover the order of gene regulatory events during cell state transitions
-Version: 0.1.0
+Version: 1.0.0
 Author: Elaine Yiqun CAO
 Maintainer: Elaine Yiqun CAO <yiqun.cao@u.nus.edu.sg>
 Description: This package discovers the order of gene regulatory events during

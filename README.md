@@ -1,10 +1,9 @@
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # GeneSwitches
 
 <!-- badges: start -->
-
+[![GitHub version](https://img.shields.io/badge/GitHub-v1.0.0-blue)](https://github.com/SGDDNB/GeneSwitches)
 <!-- badges: end -->
 
 The goal of GeneSwitches is to discover the order of gene-expression and
