@@ -20,7 +20,12 @@ Imports:
     plyr,
     mixtools,
     Matrix,
-    pbapply
+    pbapply,
+    Biobase,
+    fastglm,
+    ggrepel,
+    ggridges,
+    gridExtra
 RoxygenNote: 7.3.3
 Suggests: 
     testthat
