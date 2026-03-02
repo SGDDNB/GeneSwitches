@@ -7,6 +7,8 @@
 #' @param ds_cutoff only do downsampling if zero percentage is over this cutoff
 #' @param zero_ratio downsampling zeros to this proportion
 #' @param sig_FDR FDR cut off for significant genes
+#' @param ncores Numeric. Number of cores to use for parallel processing. Default is 3.
+#' @param EPV Numeric. Minimum number of Events Per Variable (EPV) required for a gene to be included in the regression analysis. Default is 10.
 #' @return A SingleCellExperiment object with the regression results added to the rowData.
 #'
 #' @import fastglm
@@ -17,7 +19,8 @@ find_switch_logistic_fastglm <- function(sce,
                                          ds_cutoff = 0.7,
                                          zero_ratio = ds_cutoff,
                                          sig_FDR = 0.05,
-                                         ncores = 1) {
+                                         ncores = 3,
+                                         EPV = 10) {
   # CHECK: Ensure the necessary assays are present in the SingleCellExperiment object
   if (!("binary" %in% names(assays(sce))) || !("expdata" %in% names(assays(sce)))) {
     stop("The SingleCellExperiment object must contain 'binary' and 'expdata' assays. Please run 'binarize_exp()' first to create these assays.")
@@ -80,7 +83,7 @@ find_switch_logistic_fastglm <- function(sce,
   # Calculate the number of cells expressing each gene (Sum of the column in binary_t)
   gene_counts <- Matrix::colSums(binary_t)
   # Define the threshold
-  min_cells_required <- 10
+  min_cells_required <- EPV
   # Identify genes to skip:
   # 1. Expressed in < 10 cells (Too few 1s)
   # 2. Expressed in > (Total - 10) cells (Too few 0s)

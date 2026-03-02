@@ -9,7 +9,9 @@ find_switch_logistic_fastglm(
   downsample = TRUE,
   ds_cutoff = 0.7,
   zero_ratio = ds_cutoff,
-  sig_FDR = 0.05
+  sig_FDR = 0.05,
+  ncores = 3,
+  EPV = 10
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ find_switch_logistic_fastglm(
 \item{zero_ratio}{downsampling zeros to this proportion}
 
 \item{sig_FDR}{FDR cut off for significant genes}
+
+\item{ncores}{Numeric. Number of cores to use for parallel processing. Default is 3.}
+
+\item{EPV}{Numeric. Minimum number of Events Per Variable (EPV) required for a gene to be included in the regression analysis. Default is 10.}
 }
 \value{
 A SingleCellExperiment object with the regression results added to the rowData.
