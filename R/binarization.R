@@ -1,5 +1,5 @@
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Welcome to GeneSwitches!")
+  packageStartupMessage("Welcome to GeneSwitches! \n Version: ", utils::packageVersion("GeneSwitches"))
 }
 
 #' @title Binarize gene expression
