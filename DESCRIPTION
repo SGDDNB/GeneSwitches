@@ -21,6 +21,7 @@ Imports:
     mixtools,
     Matrix,
     pbapply,
+    pbmcapply,
     Biobase,
     fastglm,
     ggrepel,
