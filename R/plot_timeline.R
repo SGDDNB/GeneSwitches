@@ -57,8 +57,8 @@ filter_switchgenes <- function(sce, allgenes = FALSE, pathway_name = NULL, genel
 
   toplotgl_sub <- toplotgl[toplotgl$zerop_gene < zero_pct & toplotgl$prd_quality == 1 & toplotgl$pseudoR2s > r2cutoff &
                            toplotgl$direction %in% direction, ]
+  toplotgl_sub <- toplotgl_sub[order(toplotgl_sub$pseudoR2s, decreasing = TRUE),]
   if (nrow(toplotgl_sub) > topnum) {
-    toplotgl_sub <- toplotgl_sub[order(toplotgl_sub$pseudoR2s, decreasing = TRUE),]
     toplotgl_sub <- toplotgl_sub[1:topnum,]
   }
   return(toplotgl_sub)
