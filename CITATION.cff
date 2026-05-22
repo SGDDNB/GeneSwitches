@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Elaine"
+  given-names: "Yiqun"
+- family-names: "Nicholas"
+  given-names: "Moi Taiga"
+  orcid: "https://orcid.org/0000-0002-5609-868X"
+title: "GeneSwitches"
+version: 1.0.0
+doi: https://doi.org/10.1093/bioinformatics/btaa099
+date-released: 2026-05-22
+url: "https://github.com/SGDDNB/GeneSwitches"
