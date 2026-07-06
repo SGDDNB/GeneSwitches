@@ -75,7 +75,7 @@ binarize_exp <- function(sce, fix_cutoff = FALSE, binarize_cutoff = 0.2, ncores 
     expdata_t <- expdata_t[, !(colnames(expdata_t) %in% low5_exp_genes)]
     
     # --- MIXTURE MODEL FITTING ---
-    message("Fitting mixture models for each gene, using", ncores, " cores...")
+    message("Fitting mixture models for each gene, using ",ncores, " cores...")
     
     # Define the function to fit mixture models for a single gene
     fit_gene_fun <- function(iGene) {
